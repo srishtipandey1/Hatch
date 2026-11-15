@@ -1,0 +1,1 @@
+Read AGENTS.md at the repository root first and follow it. The docs in docs/ are the source of truth. Environment is Windows PowerShell; do not use make or bash-only commands. Never push. Commits are local, plain, and carry no trailers.
