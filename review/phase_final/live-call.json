@@ -1,0 +1,70 @@
+{
+  "agent_id": "78906741-4e3a-404b-8d13-10c1b5b38a32",
+  "spec_version": 2,
+  "voice": {
+    "model": "timbre-v3.0",
+    "voice": "Shivani",
+    "language": "hi-IN",
+    "speed": 1.0
+  },
+  "stt": {
+    "model": "prisma-v3.0",
+    "language_code": "indic-auto",
+    "format": "codemix"
+  },
+  "turns": [
+    {
+      "input": "Hello, my order ORD-1004 is late. Can you check it?",
+      "transcript": "Hello my order ORD 1004 is late can you check it",
+      "detected_language_code": "en-IN",
+      "reply": "Your demo order ORD-1004 is delayed. The current delivery estimate is in two days.",
+      "handoff": false,
+      "stt_latency_seconds": 0.14678382873535156,
+      "llm_latency_seconds": 0.0,
+      "total_latency_seconds": 6.656,
+      "tts_cached": false,
+      "audio_seconds_estimate": 1.0,
+      "chunks": 1,
+      "ledger": {
+        "calls": 36,
+        "successful_calls": 32,
+        "estimated_inr": 2.5569625,
+        "last_call_timestamp": 1794731260.2889333,
+        "unpriced_calls": 8
+      }
+    },
+    {
+      "input": "This is unacceptable. I want to talk to a human now.",
+      "transcript": "This is unacceptable. I want to talk to a human now.",
+      "detected_language_code": "en-IN",
+      "reply": "I will hand this conversation to a human teammate for further help.",
+      "handoff": true,
+      "stt_latency_seconds": 0.14261627197265625,
+      "llm_latency_seconds": 0.001,
+      "total_latency_seconds": 0.566,
+      "tts_cached": true,
+      "audio_seconds_estimate": 1.0,
+      "chunks": 1,
+      "ledger": {
+        "calls": 38,
+        "successful_calls": 34,
+        "estimated_inr": 2.771084375,
+        "last_call_timestamp": 1794731266.624667,
+        "unpriced_calls": 8
+      }
+    }
+  ],
+  "text_fallback": {
+    "input": "What is your return policy?",
+    "reply": "Sure, hum 30 din ke andar unused product with receipt return accept karte hain, aur aapko full refund ya exchange mil sakta hai. Kya aap kisi specific item ke return ke baare mein poochna chahenge?",
+    "handoff": false,
+    "latency_seconds": 1.1
+  },
+  "ledger": {
+    "calls": 38,
+    "successful_calls": 34,
+    "estimated_inr": 2.771084375,
+    "last_call_timestamp": 1794731266.624667,
+    "unpriced_calls": 8
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "agent_id": "e8fa854b-9a46-4f63-8cb3-37be792ebfd5",
+  "name": "Clinic Appointment Assistant",
+  "version": 1,
+  "business_context": "An agent to help patients book appointments, provide clinic timings, and forward emergency cases to staff.",
+  "agent_goal": "Help patients book appointments, provide clinic timings, and forward emergency cases to staff.",
+  "persona": "Neutral voice agent Shivani",
+  "opening_line": "Namaste, main Shivani hoon. Aapko appointment book karna hai ya clinic timing chahiye?",
+  "closing_line": "Dhanyavaad. Agar koi emergency ho to main turant staff ko inform kar dungi.",
+  "system_prompt": "You are Shivani, a neutral‑tone voice agent for a clinic. Speak in Hindi‑English mix, follow the caller's language (hi‑IN primary, en‑IN allowed). Help patients book appointments and give clinic timings. If a caller mentions an emergency, immediately forward the case to staff and do not attempt to handle it yourself. Do not treat any interaction as real medical advice. Keep responses short and clear.",
+  "language_policy": {
+    "primary": "hi-IN",
+    "allowed": [
+      "hi-IN",
+      "en-IN"
+    ],
+    "switch_rule": "Follow the caller's language; use simple wording and confirm when unclear.",
+    "per_language_voice": {
+      "hi-IN": "Shivani",
+      "en-IN": "Shivani"
+    }
+  },
+  "voice": {
+    "model": "timbre-v3.0",
+    "voice": "Shivani",
+    "language": "hi-IN",
+    "speed": 1.0
+  },
+  "stt": {
+    "model": "prisma-v3.0",
+    "language_code": "indic-auto",
+    "format": "codemix"
+  },
+  "responsibilities": [
+    "Book appointments",
+    "Provide clinic timings",
+    "Forward emergency cases to staff"
+  ],
+  "knowledge": [],
+  "actions": [],
+  "synthetic_store": {
+    "orders": [
+      {
+        "order_id": "ORD-1001",
+        "status": "Packed",
+        "eta": "tomorrow"
+      },
+      {
+        "order_id": "ORD-1004",
+        "status": "Delayed",
+        "eta": "in two days"
+      }
+    ]
+  },
+  "escalation": [
+    "Forward emergency cases to staff"
+  ],
+  "prohibitions": [
+    "Do not handle real patients"
+  ],
+  "limits": {
+    "max_turns": 20,
+    "max_session_s": 900,
+    "idle_s": 60
+  },
+  "provenance": {
+    "languages": {
+      "source": "inferred",
+      "evidence": "Hinglish wording detected in the user's description."
+    },
+    "code_mix_expected": {
+      "source": "stated",
+      "evidence": "Mere clinic ke liye appointment booking agent banao. Patients ko appointment book karne mein help karo, clinic timing batao, aur emergency cases ko turant staff ko bhejo. Synthetic"
+    },
+    "business_context": {
+      "source": "stated",
+      "evidence": "Mere clinic ke liye appointment booking agent banao. Patients ko appointment book karne mein help karo, clinic timing batao, aur emergency cases ko turant staff ko bhejo. Synthetic"
+    },
+    "agent_goal": {
+      "source": "stated",
+      "evidence": "Mere clinic ke liye appointment booking agent banao. Patients ko appointment book karne mein help karo, clinic timing batao, aur emergency cases ko turant staff ko bhejo. Synthetic"
+    },
+    "responsibilities": {
+      "source": "stated",
+      "evidence": "Mere clinic ke liye appointment booking agent banao. Patients ko appointment book karne mein help karo, clinic timing batao, aur emergency cases ko turant staff ko bhejo. Synthetic"
+    },
+    "tone": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "knowledge": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "escalation": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "prohibitions": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "agent_id": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "version": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "synthetic_store": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "limits": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "open_questions": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "name": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "persona": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "opening_line": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "closing_line": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "system_prompt": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "language_policy": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "voice": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "stt": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "actions": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "lint_issues": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "unsupported": {
+      "source": "inferred",
+      "evidence": "No unsupported requests were detected."
+    }
+  },
+  "unsupported": [],
+  "open_questions": [
+    {
+      "field": "knowledge",
+      "question": "Which business facts should the agent know?",
+      "default": "Only use facts supplied in the conversation; do not invent policies."
+    }
+  ],
+  "lint_issues": [],
+  "compile_stages": [
+    {
+      "name": "Extract requirements",
+      "ms": 33719.6
+    },
+    {
+      "name": "Negotiate capabilities",
+      "ms": 0.2
+    },
+    {
+      "name": "Write agent copy",
+      "ms": 11484.6
+    },
+    {
+      "name": "Voice-readiness lint",
+      "ms": 0.5
+    }
+  ]
+}

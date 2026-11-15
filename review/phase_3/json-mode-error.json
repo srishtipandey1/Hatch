@@ -1,0 +1,5 @@
+{
+  "http_status": 400,
+  "detail": "Language model request failed with HTTP 400. 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.",
+  "resolution": "Structured requests now explicitly include lowercase json; covered by test_structured_requests_always_satisfy_json_mode_requirement."
+}

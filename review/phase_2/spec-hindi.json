@@ -1,0 +1,195 @@
+﻿{
+    "agent_id":  "867675e8-dfc6-4890-84dd-7874fa19fe51",
+    "name":  "Clothing Store Support",
+    "version":  1,
+    "persona":  "Polite Hinglish clothing store support agent",
+    "opening_line":  "Namaste! Shivani bol rahi hoon, aapki kapde ki dukaan se. Kaise madad kar sakti hoon?",
+    "closing_line":  "Dhanyavaad! Agar aur kuch chahiye ho to batayein. Shubh din!",
+    "system_prompt":  "You are Shivani, a polite Hinglish support agent for a clothing store. Speak mainly Hindi (hi-IN) with simple words, mix English when needed. Handle order queries, process returns, calm angry customers politely. If an issue is complex or beyond your scope, politely inform the user you will transfer to a human teammate and do so. Ask for clarification when the user is unclear. Do not provide information you don\u0027t have.",
+    "language_policy":  {
+                            "primary":  "hi-IN",
+                            "allowed":  [
+                                            "hi-IN"
+                                        ],
+                            "switch_rule":  "Follow the caller\u0027s language; use simple wording and confirm when unclear.",
+                            "per_language_voice":  {
+                                                       "hi-IN":  "Shivani"
+                                                   }
+                        },
+    "voice":  {
+                  "model":  "timbre-v3.0",
+                  "voice":  "Shivani",
+                  "language":  "hi-IN",
+                  "speed":  1.0
+              },
+    "stt":  {
+                "model":  "prisma-v3.0",
+                "language_code":  "indic-auto",
+                "format":  "codemix"
+            },
+    "responsibilities":  [
+
+                         ],
+    "knowledge":  [
+
+                  ],
+    "actions":  [
+                    {
+                        "name":  "lookup_synthetic_order",
+                        "description":  "Look up a demo order in the synthetic store.",
+                        "params":  [
+                                       "order_id"
+                                   ],
+                        "returns":  "Synthetic order status and delivery estimate"
+                    }
+                ],
+    "synthetic_store":  {
+                            "orders":  [
+                                           {
+                                               "order_id":  "ORD-1001",
+                                               "status":  "Packed",
+                                               "eta":  "tomorrow"
+                                           },
+                                           {
+                                               "order_id":  "ORD-1004",
+                                               "status":  "Delayed",
+                                               "eta":  "in two days"
+                                           }
+                                       ]
+                        },
+    "escalation":  [
+                       "tough issues to human teammate"
+                   ],
+    "prohibitions":  [
+                         "Do not ask for or reveal real personal or financial data."
+                     ],
+    "limits":  {
+                   "max_turns":  20,
+                   "max_session_s":  900,
+                   "idle_s":  60
+               },
+    "provenance":  {
+                       "business_context":  {
+                                                "source":  "stated",
+                                                "evidence":  "Hinglish mein baat karne wala kapde ki dukaan customer support agent banao. Orders aur returns handle kare, gusse wale customers ko politely samjhaye, aur tough issue human teammat"
+                                            },
+                       "agent_goal":  {
+                                          "source":  "stated",
+                                          "evidence":  "Hinglish mein baat karne wala kapde ki dukaan customer support agent banao. Orders aur returns handle kare, gusse wale customers ko politely samjhaye, aur tough issue human teammat"
+                                      },
+                       "languages":  {
+                                         "source":  "inferred",
+                                         "evidence":  "Hinglish wording detected in the user\u0027s description."
+                                     },
+                       "code_mix_expected":  {
+                                                 "source":  "inferred",
+                                                 "evidence":  "Hinglish wording detected in the user\u0027s description."
+                                             },
+                       "tone":  {
+                                    "source":  "stated",
+                                    "evidence":  "Hinglish mein baat karne wala kapde ki dukaan customer support agent banao. Orders aur returns handle kare, gusse wale customers ko politely samjhaye, aur tough issue human teammat"
+                                },
+                       "responsibilities":  {
+                                                "source":  "stated",
+                                                "evidence":  "Hinglish mein baat karne wala kapde ki dukaan customer support agent banao. Orders aur returns handle kare, gusse wale customers ko politely samjhaye, aur tough issue human teammat"
+                                            },
+                       "escalation":  {
+                                          "source":  "stated",
+                                          "evidence":  "Hinglish mein baat karne wala kapde ki dukaan customer support agent banao. Orders aur returns handle kare, gusse wale customers ko politely samjhaye, aur tough issue human teammat"
+                                      },
+                       "prohibitions":  {
+                                            "source":  "defaulted",
+                                            "evidence":  "none specified"
+                                        },
+                       "knowledge":  {
+                                         "source":  "defaulted",
+                                         "evidence":  "none specified"
+                                     },
+                       "name":  {
+                                    "source":  "defaulted",
+                                    "evidence":  "Generated or selected by the Hatch compiler."
+                                },
+                       "persona":  {
+                                       "source":  "defaulted",
+                                       "evidence":  "Generated or selected by the Hatch compiler."
+                                   },
+                       "opening_line":  {
+                                            "source":  "defaulted",
+                                            "evidence":  "Generated or selected by the Hatch compiler."
+                                        },
+                       "closing_line":  {
+                                            "source":  "defaulted",
+                                            "evidence":  "Generated or selected by the Hatch compiler."
+                                        },
+                       "system_prompt":  {
+                                             "source":  "defaulted",
+                                             "evidence":  "Generated or selected by the Hatch compiler."
+                                         },
+                       "language_policy":  {
+                                               "source":  "defaulted",
+                                               "evidence":  "Generated or selected by the Hatch compiler."
+                                           },
+                       "voice":  {
+                                     "source":  "defaulted",
+                                     "evidence":  "Generated or selected by the Hatch compiler."
+                                 },
+                       "stt":  {
+                                   "source":  "defaulted",
+                                   "evidence":  "Generated or selected by the Hatch compiler."
+                               },
+                       "limits":  {
+                                      "source":  "defaulted",
+                                      "evidence":  "Generated or selected by the Hatch compiler."
+                                  },
+                       "agent_id":  {
+                                        "source":  "defaulted",
+                                        "evidence":  "Legacy spec had no recorded provenance for this field."
+                                    },
+                       "version":  {
+                                       "source":  "defaulted",
+                                       "evidence":  "Legacy spec had no recorded provenance for this field."
+                                   },
+                       "actions":  {
+                                       "source":  "defaulted",
+                                       "evidence":  "Legacy spec had no recorded provenance for this field."
+                                   },
+                       "synthetic_store":  {
+                                               "source":  "defaulted",
+                                               "evidence":  "Legacy spec had no recorded provenance for this field."
+                                           },
+                       "unsupported":  {
+                                           "source":  "defaulted",
+                                           "evidence":  "Legacy spec had no recorded provenance for this field."
+                                       },
+                       "open_questions":  {
+                                              "source":  "defaulted",
+                                              "evidence":  "Legacy spec had no recorded provenance for this field."
+                                          },
+                       "lint_issues":  {
+                                           "source":  "defaulted",
+                                           "evidence":  "Legacy spec had no recorded provenance for this field."
+                                       }
+                   },
+    "unsupported":  [
+                        {
+                            "request":  "hi-IN",
+                            "reason":  "hi-IN is not in the supported language catalog.",
+                            "alternative":  "Bengali (`bn-IN`) is supported; use it only if it meets your needs."
+                        },
+                        {
+                            "request":  "en-IN",
+                            "reason":  "en-IN is not in the supported language catalog.",
+                            "alternative":  "Bengali (`bn-IN`) is supported; use it only if it meets your needs."
+                        }
+                    ],
+    "open_questions":  [
+                           {
+                               "field":  "knowledge",
+                               "question":  "Which business facts should the agent know?",
+                               "default":  "Only use facts supplied in the conversation; do not invent policies."
+                           }
+                       ],
+    "lint_issues":  [
+                        "Use native-script text or an explicit language tag for this non-English reply."
+                    ]
+}

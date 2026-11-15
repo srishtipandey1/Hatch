@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import time
 from contextlib import asynccontextmanager
 
@@ -56,6 +57,44 @@ class TTSRequest(BaseModel):
     speed: float = 1.0
 
 
+def split_for_tts(text: str, max_chars: int = 180) -> list[str]:
+    chunks: list[str] = []
+    current = ""
+    for word in text.split():
+        candidate = f"{current} {word}".strip()
+        if current and len(candidate) > max_chars:
+            chunks.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        chunks.append(current)
+    return chunks or [text]
+
+
+async def synthesize_chunks(
+    text: str,
+    *,
+    model: str,
+    voice: str,
+    language: str,
+    speed: float = 1.0,
+) -> tuple[list[str], list[dict[str, object]]]:
+    encoded: list[str] = []
+    metadata: list[dict[str, object]] = []
+    for chunk in split_for_tts(text):
+        audio, meta = await gateway.synthesize(
+            chunk,
+            model=model,
+            voice=voice,
+            language=language,
+            speed=speed,
+        )
+        encoded.append(base64.b64encode(audio).decode("ascii"))
+        metadata.append(meta)
+    return encoded, metadata
+
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "Hatch"}
@@ -108,7 +147,12 @@ async def voice_turn(audio: UploadFile = File(...)) -> dict[str, object]:
             )
         detected_language = stt.get("detected_language_code")
         language = detected_language if detected_language in SUPPORTED_LANGUAGES else "hi-IN"
-        reply_audio, tts_metadata = await gateway.synthesize(transcript, language=language)
+        audio_chunks, tts_metadata = await synthesize_chunks(
+            transcript,
+            model=TIMBRE_MODEL,
+            voice=TTS_VOICE,
+            language=language,
+        )
     except AudioConversionError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except GnaniAPIError as error:
@@ -124,10 +168,11 @@ async def voice_turn(audio: UploadFile = File(...)) -> dict[str, object]:
         "stt_model": stt.get("model", PRISMA_MODEL),
         "stt_latency_seconds": stt.get("end_to_end_latency"),
         "stt_request_id": stt.get("request_id"),
-        "tts_model": tts_metadata.get("model", TIMBRE_MODEL),
-        "tts_request_id": tts_metadata.get("request_id"),
-        "tts_cached": tts_metadata.get("cached", False),
-        "audio_base64": base64.b64encode(reply_audio).decode("ascii"),
+        "tts_model": tts_metadata[0].get("model", TIMBRE_MODEL) if tts_metadata else TIMBRE_MODEL,
+        "tts_request_id": tts_metadata[0].get("request_id") if tts_metadata else None,
+        "tts_cached": all(bool(meta.get("cached")) for meta in tts_metadata),
+        "audio_base64": audio_chunks[0] if audio_chunks else "",
+        "audio_chunks": audio_chunks,
         "total_latency_seconds": round(time.perf_counter() - started, 3),
         "ledger": gateway.ledger.summary(),
     }
@@ -236,7 +281,7 @@ async def agent_voice_turn(
         reply, handoff, llm_latency = await respond(spec, transcript, valid_history, llm)
         detected_language = stt.get("detected_language_code")
         language = detected_language if detected_language in spec.language_policy.allowed else spec.voice.language
-        reply_audio, tts_metadata = await gateway.synthesize(
+        audio_chunks, tts_metadata = await synthesize_chunks(
             reply,
             model=spec.voice.model,
             voice=spec.language_policy.per_language_voice.get(language, spec.voice.voice),
@@ -262,8 +307,9 @@ async def agent_voice_turn(
         "llm_latency_seconds": llm_latency,
         "total_latency_seconds": round(time.perf_counter() - started, 3),
         "handoff": handoff,
-        "audio_base64": base64.b64encode(reply_audio).decode("ascii"),
-        "tts_request_id": tts_metadata.get("request_id"),
-        "tts_cached": tts_metadata.get("cached", False),
+        "audio_base64": audio_chunks[0] if audio_chunks else "",
+        "audio_chunks": audio_chunks,
+        "tts_request_id": tts_metadata[0].get("request_id") if tts_metadata else None,
+        "tts_cached": all(bool(meta.get("cached")) for meta in tts_metadata),
         "ledger": gateway.ledger.summary(),
     }

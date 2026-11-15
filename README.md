@@ -19,25 +19,26 @@ python -m pip install -r requirements.txt
 Push-Location frontend
 npm install
 Pop-Location
-Copy-Item .env.example .env
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 # Fill in .env locally; never commit it.
 python scripts/dev.py
 ```
 
-Open the frontend at <http://localhost:5173>. Backend API docs are at <http://localhost:8000/docs>.
+Open the URL that Vite prints (normally <http://localhost:5173>). Backend API docs are at <http://localhost:8000/docs>.
 
 ## Tests and smoke check
 
 ```powershell
 python scripts/test.py
+# Start the app first; speech requires GNANI_API_KEY.
 python scripts/smoke.py
 ```
 
-Automated tests use fakes and do not spend Gnani credits. The smoke check makes one real STT and one real TTS request.
+Automated tests use fakes and do not spend Gnani credits. The smoke check uses the local gateway for one synthetic TTS-to-STT round trip and therefore spends a small, ledgered amount.
 
 ## Models and limitations
 
-Speech uses the Gnani Prisma STT and Timbre TTS APIs. Reasoning uses the configured third-party OpenAI-compatible LLM; Evon is not available as a hosted API. Agents run on the Hatch runtime, not Gnani Agent Builder. Calls and action data are synthetic; no telephony or real customer integrations are provided. LLM-generated evaluation results are small-sample estimates, not guarantees.
+Speech uses the Gnani Prisma STT and Timbre TTS APIs. Reasoning uses the third-party OpenAI-compatible LLM configured by `LLM_BASE_URL` / `LLM_MODEL`; Evon is not available as a hosted API. Agents run on the Hatch runtime, not Gnani Agent Builder. Calls and action data are synthetic; no telephony or real customer integrations are provided. LLM-generated evaluation results are small-sample estimates, not guarantees. Speech costs are conservative planning estimates because per-unit dashboard rates were not supplied; see [docs/CREDITS.md](./docs/CREDITS.md). Text compilation and simulation work even if speech is blocked by the local budget guard.
 
 ## Privacy
 

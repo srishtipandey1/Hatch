@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 import re
+import time
 
 from backend.app.llm import LLMGateway
 from backend.app.lint import lint_spec
@@ -241,6 +242,11 @@ def negotiate(requirements: RequirementSet) -> tuple[LanguagePolicy, VoiceConfig
 
 
 async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
+    stages: list[dict[str, object]] = []
+
+    def stage(name: str, started: float) -> None:
+        stages.append({"name": name, "ms": round((time.perf_counter() - started) * 1000, 1)})
+
     extraction_system = (
         "You extract a safe voice-agent brief. Use only facts stated by the user. "
         "Do not invent policies, prices, hours, phone numbers, or private data. "
@@ -253,11 +259,13 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
         "The provenance object should map field names to {source,evidence}.\n\n"
         f"Description:\n{description}"
     )
+    _stage_started = time.perf_counter()
     requirements = await llm.structured(
         system=extraction_system,
         user=extraction_user,
         schema=RequirementSet,
     )
+    stage("Extract requirements", _stage_started)
     if detect_hinglish(description):
         requested_languages = [
             language for language in requirements.languages
@@ -288,8 +296,11 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
             _defaulted("No explicit source was identified; retained a conservative default."),
         )
 
+    _stage_started = time.perf_counter()
     language_policy, voice, stt, unsupported = negotiate(requirements)
     unsupported.extend(requested_unsupported(description))
+    stage("Negotiate capabilities", _stage_started)
+    _stage_started = time.perf_counter()
     copy = await llm.structured(
         system=(
             "You write concise, spoken voice-agent copy. Avoid markdown, URLs, emojis, "
@@ -304,6 +315,7 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
         ),
         schema=GeneratedCopy,
     )
+    stage("Write agent copy", _stage_started)
 
     provenance = dict(requirements.provenance)
     for path in ("agent_id", "version", "synthetic_store", "limits", "open_questions"):
@@ -364,6 +376,8 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
     spec = AgentSpec(
         agent_id=str(uuid.uuid4()),
         name=agent_name,
+        business_context=requirements.business_context,
+        agent_goal=requirements.agent_goal,
         persona=copy.persona.strip(),
         opening_line=copy.opening_line.strip(),
         closing_line=copy.closing_line.strip(),
@@ -387,5 +401,8 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
         unsupported=unsupported,
         open_questions=questions,
     )
+    _stage_started = time.perf_counter()
     spec.lint_issues = lint_spec(spec)
+    stage("Voice-readiness lint", _stage_started)
+    spec.compile_stages = list(stages)
     return spec

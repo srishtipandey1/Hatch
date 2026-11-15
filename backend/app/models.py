@@ -85,6 +85,8 @@ class AgentSpec(BaseModel):
     agent_id: str
     name: str
     version: int = 1
+    business_context: str = ""
+    agent_goal: str = ""
     persona: str
     opening_line: str
     closing_line: str
@@ -103,6 +105,7 @@ class AgentSpec(BaseModel):
     unsupported: list[Unsupported] = Field(default_factory=list)
     open_questions: list[Question] = Field(default_factory=list)
     lint_issues: list[str] = Field(default_factory=list)
+    compile_stages: list[dict[str, object]] = Field(default_factory=list)
 
 
 class GeneratedCopy(BaseModel):

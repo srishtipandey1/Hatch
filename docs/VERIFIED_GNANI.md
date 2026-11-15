@@ -79,9 +79,14 @@ Checks were serial and limited to one request per eligible model. This probe did
 - SSE chunk framing, maximum accepted text length, and realtime WebSocket header variants.
 - Error response shapes requiring invalid credentials or deliberate fault injection.
 
+## Additional contract correction
+
+- The documented Timbre API accepts symbolic speed values such as `medium`, but a real v3.0 request with `speed="medium"` returned HTTP 400: `Input should be a valid number, unable to parse string as a number at body -> speed`. Omitting `speed` succeeds. Hatch sends numeric `1.0` (the provider's default-rate value) instead.
+
 ## Decisions this implies
 
 - API/model defaults remain provisional until successful results above confirm account access.
 - Keep Gnani calls serial at concurrency one.
 - Do not estimate unit prices without dashboard measurements.
 - Use REST push-to-talk; defer realtime WebSocket probing.
+- Send numeric TTS `speed` (`1.0` default); the documented symbolic value was rejected.

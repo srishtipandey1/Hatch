@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import time
 from typing import Any
 
@@ -26,6 +27,21 @@ from backend.app.settings import (
 API_BASE = "https://api.vachana.ai"
 RETRY_DELAYS = (0.5, 1.0, 2.0)
 RETRYABLE_STATUS = {429, 500, 503, 504}
+TTS_REPLACEMENTS = {
+    "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
+    "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-",
+    "\u2026": "...", "\u00a0": " ", "\u200b": "", "\u200c": "", "\u200d": "",
+    "\ufeff": "",
+}
+MIN_AUDIO_BYTES = 1200
+
+
+def normalize_for_tts(text: str) -> str:
+    for source, target in TTS_REPLACEMENTS.items():
+        text = text.replace(source, target)
+    text = re.sub(r"[*_#`]+", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
 class GnaniAPIError(Exception):
@@ -199,6 +215,9 @@ class GnaniGateway:
         speed: float = 1.0,
         priority: int = PriorityLimiter.LIVE,
     ) -> tuple[bytes, dict[str, Any]]:
+        text = normalize_for_tts(text)
+        if not text:
+            raise GnaniAPIError(400, "EMPTY_TEXT", "There is no speakable text in this reply.")
         cache_key = self.cache.key(model=model, voice=voice, language=language, speed=speed, text=text)
         cached = await asyncio.to_thread(self.cache.get, cache_key)
         if cached is not None:
@@ -241,8 +260,18 @@ class GnaniGateway:
                     str(payload.get("message", "TTS synthesis failed"))[:500],
                 )
         audio = response.content
-        if not audio:
-            raise GnaniAPIError(response.status_code, "EMPTY_AUDIO", "TTS returned empty audio.")
+        if len(audio) < MIN_AUDIO_BYTES:
+            raise GnaniAPIError(
+                response.status_code,
+                "EMPTY_AUDIO",
+                "Timbre returned audio that is too short to play. Text fallback is available.",
+            )
+        if not audio.startswith(b"RIFF"):
+            raise GnaniAPIError(
+                response.status_code,
+                "INVALID_AUDIO",
+                "Timbre returned an unexpected audio format. Text fallback is available.",
+            )
         await asyncio.to_thread(self.cache.put, cache_key, audio)
         return audio, {
             "cached": False,

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import tempfile
@@ -38,7 +38,7 @@ def test_tts_cache_prevents_duplicate_provider_calls() -> None:
         async def handler(request: httpx.Request) -> httpx.Response:
             nonlocal calls
             calls += 1
-            return httpx.Response(200, content=b"RIFF-audio", headers={"content-type": "audio/wav"})
+            return httpx.Response(200, content=b"RIFF" + b"\x00" * 2048, headers={"content-type": "audio/wav"})
 
         with tempfile.TemporaryDirectory(prefix="hatch-test-", dir=Path.cwd()) as directory:
             path = Path(directory)
@@ -106,7 +106,7 @@ def test_unpriced_speech_calls_fail_closed() -> None:
         async def handler(_request: httpx.Request) -> httpx.Response:
             nonlocal calls
             calls += 1
-            return httpx.Response(200, content=b"RIFF-audio")
+            return httpx.Response(200, content=b"RIFF" + b"\x00" * 2048)
 
         with tempfile.TemporaryDirectory(prefix="hatch-test-", dir=Path.cwd()) as directory:
             path = Path(directory)
@@ -147,7 +147,7 @@ def test_budget_guard_blocks_before_the_provider_call() -> None:
         async def handler(_request: httpx.Request) -> httpx.Response:
             nonlocal calls
             calls += 1
-            return httpx.Response(200, content=b"RIFF-audio")
+            return httpx.Response(200, content=b"RIFF" + b"\x00" * 2048)
 
         with tempfile.TemporaryDirectory(prefix="hatch-test-", dir=Path.cwd()) as directory:
             path = Path(directory)
@@ -198,7 +198,7 @@ def test_shipped_defaults_price_speech_so_the_voice_path_stays_enabled() -> None
         async def handler(_request: httpx.Request) -> httpx.Response:
             nonlocal calls
             calls += 1
-            return httpx.Response(200, content=b"RIFF-audio", headers={"content-type": "audio/wav"})
+            return httpx.Response(200, content=b"RIFF" + b"\x00" * 2048, headers={"content-type": "audio/wav"})
 
         with tempfile.TemporaryDirectory(prefix="hatch-test-", dir=Path.cwd()) as directory:
             path = Path(directory)
@@ -221,4 +221,5 @@ def test_shipped_defaults_price_speech_so_the_voice_path_stays_enabled() -> None
     estimated_inr, calls = asyncio.run(scenario())
     assert calls == 1
     assert estimated_inr is not None and estimated_inr > 0
+
 

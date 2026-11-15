@@ -1,0 +1,234 @@
+{
+  "agent_id": "73c15748-0691-4f18-a922-100254c07260",
+  "name": "Pune Pizza Assistant",
+  "version": 1,
+  "business_context": "Pizza restaurant in Pune",
+  "agent_goal": "Take table reservations, answer questions about vegetarian options and opening hours, and hand off large parties or complaints to a manager.",
+  "persona": "Friendly reservation specialist named Shivani",
+  "opening_line": "Namaste! Shivani speaking, how can I help you with a reservation or menu today?",
+  "closing_line": "Thank you! We look forward to serving you soon.",
+  "system_prompt": "You are Shivani, a friendly voice agent for a pizza restaurant in Pune. Speak in Hindi unless the caller uses English, and keep language simple. Take table reservations for up to 8 people, give opening hours (11am‑11pm), confirm vegetarian options are available, and answer related questions. If the party exceeds 8 or a complaint arises, politely transfer to a manager. Use a warm tone and confirm details.",
+  "language_policy": {
+    "primary": "hi-IN",
+    "allowed": [
+      "hi-IN",
+      "en-IN"
+    ],
+    "switch_rule": "Follow the caller's language; use simple wording and confirm when unclear.",
+    "per_language_voice": {
+      "hi-IN": "Shivani",
+      "en-IN": "Shivani"
+    }
+  },
+  "voice": {
+    "model": "timbre-v3.0",
+    "voice": "Shivani",
+    "language": "hi-IN",
+    "speed": 1.0
+  },
+  "stt": {
+    "model": "prisma-v3.0",
+    "language_code": "indic-auto",
+    "format": "transcribe"
+  },
+  "responsibilities": [
+    "Take table reservations",
+    "Answer questions about vegetarian menu options",
+    "Provide opening hours information",
+    "Escalate large parties or complaints to a manager"
+  ],
+  "knowledge": [
+    {
+      "question_variants": [
+        "How many people can I book a table for?",
+        "What is the maximum party size?",
+        "Can I reserve for a group of eight?"
+      ],
+      "answer": "You can reserve a table for up to 8 people."
+    },
+    {
+      "question_variants": [
+        "What are your opening hours?",
+        "When does the restaurant open and close?",
+        "What time do you serve dinner?"
+      ],
+      "answer": "We are open from 11am to 11pm."
+    },
+    {
+      "question_variants": [
+        "Do you have vegetarian options?",
+        "What vegetarian dishes are available?",
+        "Is the menu vegetarian-friendly?"
+      ],
+      "answer": "Yes, we offer a variety of vegetarian options on our menu."
+    }
+  ],
+  "actions": [],
+  "synthetic_store": {
+    "orders": [
+      {
+        "order_id": "ORD-1001",
+        "status": "Packed",
+        "eta": "tomorrow"
+      },
+      {
+        "order_id": "ORD-1004",
+        "status": "Delayed",
+        "eta": "in two days"
+      }
+    ]
+  },
+  "escalation": [
+    "large parties",
+    "complaints"
+  ],
+  "prohibitions": [
+    "Do not ask for or reveal real personal or financial data."
+  ],
+  "limits": {
+    "max_turns": 20,
+    "max_session_s": 900,
+    "idle_s": 60
+  },
+  "provenance": {
+    "languages": {
+      "source": "defaulted",
+      "evidence": "Hindi and English are the demo defaults."
+    },
+    "business_context": {
+      "source": "stated",
+      "evidence": "Build a phone agent for a small pizza restaurant in Pune. It should take table reservations for up to 8 people, answer questions about vegetarian options and opening hours from 11a"
+    },
+    "agent_goal": {
+      "source": "stated",
+      "evidence": "Build a phone agent for a small pizza restaurant in Pune. It should take table reservations for up to 8 people, answer questions about vegetarian options and opening hours from 11a"
+    },
+    "responsibilities": {
+      "source": "stated",
+      "evidence": "Build a phone agent for a small pizza restaurant in Pune. It should take table reservations for up to 8 people, answer questions about vegetarian options and opening hours from 11a"
+    },
+    "escalation": {
+      "source": "stated",
+      "evidence": "Build a phone agent for a small pizza restaurant in Pune. It should take table reservations for up to 8 people, answer questions about vegetarian options and opening hours from 11a"
+    },
+    "code_mix_expected": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "tone": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "knowledge": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "prohibitions": {
+      "source": "defaulted",
+      "evidence": "No explicit source was identified; retained a conservative default."
+    },
+    "agent_id": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "version": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "synthetic_store": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "limits": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "open_questions": {
+      "source": "defaulted",
+      "evidence": "Generated or selected by the Hatch compiler."
+    },
+    "name": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "persona": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "opening_line": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "closing_line": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "system_prompt": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "language_policy": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "voice": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "stt": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "actions": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "lint_issues": {
+      "source": "inferred",
+      "evidence": "Generated or selected from the extracted requirements."
+    },
+    "unsupported": {
+      "source": "inferred",
+      "evidence": "No unsupported requests were detected."
+    },
+    "knowledge.0": {
+      "source": "inferred",
+      "evidence": "Extracted as a possible fact; verify it before treating it as policy."
+    },
+    "knowledge.1": {
+      "source": "inferred",
+      "evidence": "Extracted as a possible fact; verify it before treating it as policy."
+    },
+    "knowledge.2": {
+      "source": "inferred",
+      "evidence": "Extracted as a possible fact; verify it before treating it as policy."
+    }
+  },
+  "unsupported": [],
+  "open_questions": [
+    {
+      "field": "languages",
+      "question": "Which language should the agent use?",
+      "default": "Hindi and English"
+    }
+  ],
+  "lint_issues": [],
+  "compile_stages": [
+    {
+      "name": "Extract requirements",
+      "ms": 21194.7
+    },
+    {
+      "name": "Negotiate capabilities",
+      "ms": 0.1
+    },
+    {
+      "name": "Write agent copy",
+      "ms": 10692.8
+    },
+    {
+      "name": "Voice-readiness lint",
+      "ms": 0.5
+    }
+  ]
+}

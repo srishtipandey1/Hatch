@@ -34,7 +34,10 @@ def main() -> int:
         return 2
 
     commands = [
-        [sys.executable, "-m", "uvicorn", "backend.app.main:app", "--host", "127.0.0.1", "--port", "8000"],
+        [
+            sys.executable, "-m", "uvicorn", "backend.app.main:app",
+            "--host", "127.0.0.1", "--port", "8000",
+        ],
         [npm, "--prefix", str(ROOT / "frontend"), "run", "dev"],
     ]
     processes: list[subprocess.Popen[bytes]] = []
