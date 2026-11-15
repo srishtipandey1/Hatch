@@ -2,12 +2,12 @@
   "tts_http_status": 200,
   "stt_model": "prisma-v3.0",
   "transcript_length": 40,
-  "round_trip_seconds": 0.681,
+  "round_trip_seconds": 0.799,
   "ledger": {
-    "calls": 32,
-    "successful_calls": 28,
-    "estimated_inr": 2.196840625,
-    "last_call_timestamp": 1794730995.1243787,
+    "calls": 40,
+    "successful_calls": 36,
+    "estimated_inr": 3.075328125,
+    "last_call_timestamp": 1794743950.119378,
     "unpriced_calls": 8
   }
 }

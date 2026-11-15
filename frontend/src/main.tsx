@@ -71,6 +71,7 @@ type VoiceTurn = VoiceEcho & {
 
 const EXAMPLE_REQUEST =
   "Mere kapde ki dukaan ke liye ek customer support agent banao. Orders aur return policy handle karo, gusse wale customers ko politely handle karna, aur mushkil cases human ko dena. Demo orders ORD-1001 se ORD-1010 tak hain.";
+
 const KNOWN_STAGES = [
   "Extract requirements",
   "Negotiate capabilities",
@@ -255,11 +256,87 @@ function ProvenanceBadge({ field, value }: { field: string; value: Provenance })
   );
 }
 
-function SpecView({ agent, onTest, testing, report }: {
+function Stepper({ stages, working }: { stages: Stage[]; working: boolean }) {
+  const timing = new Map(stages.map((stage) => [stage.name, stage.ms]));
+  return (
+    <ol className="stepper" aria-label="Compile stages">
+      {KNOWN_STAGES.map((name, index) => {
+        const ms = timing.get(name);
+        const done = ms !== undefined;
+        const active = working && !done && index === stages.length;
+        return (
+          <li key={name} className={done ? "done" : active ? "active" : "pending"}>
+            <span className="dot">{done ? "✓" : index + 1}</span>
+            <span>{name}</span>
+            <small>{done ? `${Math.round(ms ?? 0)} ms` : active ? "working" : "waiting"}</small>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function TestReportView({ report }: { report: Report }) {
+  const beforePassed = report.before_verdicts.filter((verdict) => verdict.result === "pass").length;
+  const afterPassed = report.verdicts.filter((verdict) => verdict.result === "pass").length;
+  return (
+    <section className="report" aria-labelledby="report-title">
+      <div className="section-head">
+        <div>
+          <p className="eyebrow">Text-mode test report · {report.version_id}</p>
+          <h3 id="report-title">{report.summary}</h3>
+        </div>
+        <div className="score">
+          <span>{beforePassed}/{report.before_verdicts.length || report.verdicts.length} before</span>
+          <strong>{afterPassed}/{report.verdicts.length} after</strong>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Scenario</th><th>Persona</th><th>Result</th><th>Reason and evidence</th></tr>
+          </thead>
+          <tbody>
+            {report.verdicts.map((verdict) => (
+              <tr key={verdict.scenario_id} className={verdict.result}>
+                <td>{verdict.scenario_id.replaceAll("-", " ")}</td>
+                <td>{verdict.persona || "Simulated caller"}</td>
+                <td><span className={`verdict-pill ${verdict.result}`}>{verdict.result}</span></td>
+                <td>
+                  <p>{verdict.reason}</p>
+                  <blockquote>{verdict.evidence_turn}</blockquote>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {report.repairs.map((repair) => (
+        <details className="repair" key={repair.round}>
+          <summary>Repair round {repair.round}: {repair.reason}</summary>
+          <div className="diff">
+            <div><strong>Before</strong><pre>{repair.before}</pre></div>
+            <div><strong>After</strong><pre>{repair.after}</pre></div>
+          </div>
+        </details>
+      ))}
+      {report.repairs.length === 0 && <p className="muted">No repair was needed on this run. The loop stays armed for future failures.</p>}
+    </section>
+  );
+}
+
+function SpecView({
+  agent,
+  onTest,
+  testing,
+  report,
+  onScrollToTalk,
+}: {
   agent: AgentView;
   onTest: () => void;
   testing: boolean;
   report: Report | null;
+  onScrollToTalk: () => void;
 }) {
   const keyFields = [
     "business_context",
@@ -275,7 +352,7 @@ function SpecView({ agent, onTest, testing, report }: {
     <section className="card spec" aria-labelledby="spec-title">
       <div className="section-head">
         <div>
-          <p className="eyebrow">Compiled agent spec</p>
+          <p className="eyebrow">Step 3 · Compiled agent spec</p>
           <h2 id="spec-title">{agent.name}</h2>
           <p className="muted">{agent.persona}</p>
         </div>
@@ -331,10 +408,12 @@ function SpecView({ agent, onTest, testing, report }: {
           {agent.prohibitions.length ? (
             <ul>{agent.prohibitions.map((item) => <li key={item}>{item}</li>)}</ul>
           ) : <p className="muted">Never invent business facts.</p>}
-          {agent.knowledge.length > 0 && <>
-            <small>Approved facts</small>
-            <ul>{agent.knowledge.map((fact) => <li key={fact.answer}>{fact.answer}</li>)}</ul>
-          </>}
+          {agent.knowledge.length > 0 && (
+            <>
+              <small>Approved facts</small>
+              <ul>{agent.knowledge.map((fact) => <li key={fact.answer}>{fact.answer}</li>)}</ul>
+            </>
+          )}
         </div>
       </div>
 
@@ -373,83 +452,185 @@ function SpecView({ agent, onTest, testing, report }: {
         <button type="button" className="secondary" onClick={onTest} disabled={testing}>
           {testing ? "Running 7 simulated callers…" : report ? "Re-run simulated callers" : "Run 7 simulated callers"}
         </button>
-        <a className="button-link" href={`/a/${agent.agent_id}`}>Talk to {agent.name} <span>↗</span></a>
+        <button type="button" onClick={onScrollToTalk}>
+          Talk to {agent.name} ↓
+        </button>
+        <a className="ghost-link" href={`/a/${agent.agent_id}`} target="_blank" rel="noreferrer">
+          Direct link (/a/{agent.agent_id.slice(0, 8)}) <span>↗</span>
+        </a>
       </div>
       {report && <TestReportView report={report} />}
     </section>
   );
 }
 
-function TestReportView({ report }: { report: Report }) {
-  const beforePassed = report.before_verdicts.filter((verdict) => verdict.result === "pass").length;
-  const afterPassed = report.verdicts.filter((verdict) => verdict.result === "pass").length;
+function TalkPanel({
+  agent,
+  ledger,
+  onLedgerUpdate,
+  onError,
+}: {
+  agent: AgentView;
+  ledger: Ledger | null;
+  onLedgerUpdate: (ledger: Ledger) => void;
+  onError: (msg: string) => void;
+}) {
+  const [messages, setMessages] = useState<Turn[]>([
+    { role: "assistant", content: agent.opening_line },
+  ]);
+  const [typed, setTyped] = useState("");
+  const [working, setWorking] = useState(false);
+  const [handoff, setHandoff] = useState(false);
+  const [timing, setTiming] = useState<{ stt?: number; llm?: number; total?: number; cached?: boolean } | null>(null);
+  const messagesRef = useRef<Turn[]>(messages);
+  messagesRef.current = messages;
+
+  const recorder = useRecorder(
+    (clip) => void sendVoice(clip),
+    (message) => onError(message),
+  );
+
+  async function sendVoice(clip: Blob) {
+    setWorking(true);
+    onError("");
+    try {
+      const form = new FormData();
+      form.append("audio", clip, "turn.webm");
+      form.append("history", JSON.stringify(messagesRef.current));
+      const result = await request<VoiceTurn>(`/api/agents/${encodeURIComponent(agent.agent_id)}/voice-turn`, {
+        method: "POST",
+        body: form,
+      });
+      setMessages((current) => [
+        ...current,
+        { role: "user", content: result.transcript },
+        { role: "assistant", content: result.reply },
+      ]);
+      setHandoff(Boolean(result.handoff));
+      if (result.ledger) onLedgerUpdate(result.ledger);
+      setTiming({
+        stt: result.stt_latency_seconds,
+        llm: result.llm_latency_seconds,
+        total: result.total_latency_seconds,
+        cached: result.tts_cached,
+      });
+      await playChunks(chunksOf(result));
+    } catch (reason) {
+      onError(reason instanceof Error ? reason.message : "The voice turn failed. Type your message instead.");
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function sendText() {
+    const text = typed.trim();
+    if (!text) return;
+    setTyped("");
+    setWorking(true);
+    onError("");
+    try {
+      const result = await request<{ text: string; latency_seconds: number; handoff: boolean }>(
+        `/api/agents/${encodeURIComponent(agent.agent_id)}/turn`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, history: messagesRef.current }),
+        },
+      );
+      setMessages((current) => [
+        ...current,
+        { role: "user", content: text },
+        { role: "assistant", content: result.text },
+      ]);
+      setHandoff(Boolean(result.handoff));
+      setTiming({ llm: result.latency_seconds, total: result.latency_seconds });
+    } catch (reason) {
+      onError(reason instanceof Error ? reason.message : "That message failed. Try again.");
+    } finally {
+      setWorking(false);
+    }
+  }
+
   return (
-    <section className="report" aria-labelledby="report-title">
+    <section className="card talk" id="talk-section" aria-labelledby="talk-title">
       <div className="section-head">
         <div>
-          <p className="eyebrow">Text-mode test report · {report.version_id}</p>
-          <h3 id="report-title">{report.summary}</h3>
+          <p className="eyebrow">Step 4 · Talk</p>
+          <h2 id="talk-title">Talk to {agent.name}</h2>
+          <p className="muted">Live on Hatch runtime · Powered by Gnani Prisma and Timbre</p>
         </div>
-        <div className="score">
-          <span>{beforePassed}/{report.before_verdicts.length || report.verdicts.length} before</span>
-          <strong>{afterPassed}/{report.verdicts.length} after</strong>
+        <span className="status-chip ok">Live at /a/{agent.agent_id.slice(0, 8)}</span>
+      </div>
+
+      <div className="notice">
+        Synthetic data only. Orders ORD-1001 to ORD-1010 available. Try asking about an order or getting angry to test handoff.
+      </div>
+
+      {handoff && (
+        <div className="banner handoff" role="status">
+          <strong>Human handoff requested</strong>
+          <span>A teammate would take over in a connected deployment. The transcript is preserved.</span>
+        </div>
+      )}
+
+      <div className="call-panel">
+        <div className="chat" aria-live="polite">
+          {messages.map((turn, index) => (
+            <article className={`bubble ${turn.role}`} key={`${index}-${turn.role}`}>
+              <span>{turn.role === "user" ? "You" : agent.name}</span>
+              <p>{turn.content}</p>
+            </article>
+          ))}
+          {working && <p className="thinking">Hatch is listening and thinking…</p>}
+        </div>
+
+        <div className="call-controls">
+          <button
+            type="button"
+            className={`mic ${recorder.recording ? "recording" : ""}`}
+            onClick={recorder.recording ? recorder.stop : () => void recorder.start()}
+            disabled={working}
+            aria-label={recorder.recording ? "Stop recording" : "Push to talk"}
+          >
+            <span className="mic-icon">{recorder.recording ? "■" : "●"}</span>
+            <strong>{recorder.recording ? clock(recorder.seconds) : "Push to talk"}</strong>
+            <small>{recorder.recording ? "Tap to send" : "Hindi · Hinglish · English"}</small>
+          </button>
+          <LevelMeter level={recorder.level} active={recorder.recording} />
+        </div>
+
+        <div className="text-turn">
+          <label>
+            <span className="sr-only">Type a message</span>
+            <input
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") void sendText();
+              }}
+              placeholder="Or type a message (e.g. Mera order ORD-1004 kahan hai?)…"
+            />
+          </label>
+          <button type="button" className="secondary" disabled={working || !typed.trim()} onClick={() => void sendText()}>
+            Send
+          </button>
+        </div>
+
+        <div className="strip">
+          <span className="mono">Latency</span>
+          <span>STT {timing?.stt !== undefined ? `${(timing.stt * 1000).toFixed(0)} ms` : "—"}</span>
+          <span>LLM {timing?.llm !== undefined ? `${(timing.llm * 1000).toFixed(0)} ms` : "—"}</span>
+          <span>Turn {timing?.total !== undefined ? `${timing.total.toFixed(2)} s` : "—"}</span>
+          <span>{timing?.cached ? "TTS cached" : "TTS live"}</span>
+          <span>₹ {ledger?.estimated_inr !== null && ledger?.estimated_inr !== undefined ? ledger.estimated_inr.toFixed(2) : "—"} est.</span>
         </div>
       </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Scenario</th><th>Persona</th><th>Result</th><th>Reason and evidence</th></tr>
-          </thead>
-          <tbody>
-            {report.verdicts.map((verdict) => (
-              <tr key={verdict.scenario_id} className={verdict.result}>
-                <td>{verdict.scenario_id.replaceAll("-", " ")}</td>
-                <td>{verdict.persona || "Simulated caller"}</td>
-                <td><span className={`verdict-pill ${verdict.result}`}>{verdict.result}</span></td>
-                <td>
-                  <p>{verdict.reason}</p>
-                  <blockquote>{verdict.evidence_turn}</blockquote>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {report.repairs.map((repair) => (
-        <details className="repair" key={repair.round}>
-          <summary>Repair round {repair.round}: {repair.reason}</summary>
-          <div className="diff">
-            <div><strong>Before</strong><pre>{repair.before}</pre></div>
-            <div><strong>After</strong><pre>{repair.after}</pre></div>
-          </div>
-        </details>
-      ))}
-      {report.repairs.length === 0 && <p className="muted">No repair was needed on this run. The loop stays armed for future failures.</p>}
     </section>
   );
 }
 
-function Stepper({ stages, working }: { stages: Stage[]; working: boolean }) {
-  const timing = new Map(stages.map((stage) => [stage.name, stage.ms]));
-  return (
-    <ol className="stepper" aria-label="Compile stages">
-      {KNOWN_STAGES.map((name, index) => {
-        const ms = timing.get(name);
-        const done = ms !== undefined;
-        const active = working && !done && index === stages.length;
-        return (
-          <li key={name} className={done ? "done" : active ? "active" : "pending"}>
-            <span className="dot">{done ? "✓" : index + 1}</span>
-            <span>{name}</span>
-            <small>{done ? `${Math.round(ms ?? 0)} ms` : active ? "working" : "waiting"}</small>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
-function CreatePage() {
+function HatchApp() {
+  const initialAgentId = window.location.pathname.match(/^\/a\/([^/]+)/)?.[1] || null;
   const [description, setDescription] = useState("");
   const [transcript, setTranscript] = useState("");
   const [detected, setDetected] = useState("");
@@ -457,12 +638,13 @@ function CreatePage() {
   const [report, setReport] = useState<Report | null>(null);
   const [working, setWorking] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(Boolean(initialAgentId));
   const [error, setError] = useState("");
   const [ledger, setLedger] = useState<Ledger | null>(null);
   const [lastLatency, setLastLatency] = useState<number | null>(null);
   const [demoText, setDemoText] = useState("");
 
-  const step = report ? 3 : agent ? 2 : transcript ? 1 : 0;
+  const step = agent && report ? 3 : agent ? 2 : transcript ? 1 : 0;
   const [stageStarted, setStageStarted] = useState<number | null>(null);
   const [tick, setTick] = useState(Date.now());
 
@@ -471,6 +653,33 @@ function CreatePage() {
     const id = window.setInterval(() => setTick(Date.now()), 500);
     return () => window.clearInterval(id);
   }, [working]);
+
+  useEffect(() => {
+    if (!initialAgentId) return;
+    let cancelled = false;
+    async function loadInitial() {
+      try {
+        const loaded = await request<AgentView>(`/api/agents/${encodeURIComponent(initialAgentId!)}`);
+        if (cancelled) return;
+        setAgent(loaded);
+        setDescription(loaded.business_context || loaded.agent_goal);
+        const loadedReport = await request<Report | null>(
+          `/api/agents/${encodeURIComponent(initialAgentId!)}/test-report`,
+        ).catch(() => null);
+        if (!cancelled && loadedReport) setReport(loadedReport);
+        const ledgerSummary = await request<Ledger>("/api/ledger").catch(() => null);
+        if (!cancelled && ledgerSummary) setLedger(ledgerSummary);
+      } catch (reason) {
+        if (!cancelled) setError(reason instanceof Error ? reason.message : "Could not load agent.");
+      } finally {
+        if (!cancelled) setLoadingInitial(false);
+      }
+    }
+    void loadInitial();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialAgentId]);
 
   const recorder = useRecorder(
     (clip) => void transcribeAndCompile(clip),
@@ -517,6 +726,7 @@ function CreatePage() {
       });
       setAgent(result);
       setDescription(prompt);
+      window.history.pushState({}, "", `/a/${result.agent_id}`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Compilation failed. Text input still works.");
     } finally {
@@ -570,30 +780,73 @@ function CreatePage() {
     }
   }
 
+  function startFresh() {
+    setAgent(null);
+    setReport(null);
+    setTranscript("");
+    setDescription("");
+    setError("");
+    window.history.pushState({}, "", "/");
+  }
+
+  function scrollToTalk() {
+    const el = document.getElementById("talk-section");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }
+
   const elapsed = stageStarted ? Math.max(1, Math.round((tick - stageStarted) / 1000)) : 0;
+
+  if (loadingInitial) {
+    return (
+      <main className="app">
+        <header className="topbar">
+          <a className="brand" href="/">hatch<span>●</span></a>
+          <span className="mono">Hatch runtime · Loading…</span>
+        </header>
+        <p className="muted" style={{ marginTop: "40px" }}>Loading hatched agent…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="app">
       <header className="topbar">
-        <a className="brand" href="/">hatch<span>●</span></a>
-        <span className="mono">Hatch runtime · Prisma + Timbre</span>
+        <a className="brand" href="/" onClick={(e) => { e.preventDefault(); startFresh(); }}>
+          hatch<span>●</span>
+        </a>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          {agent && (
+            <button type="button" className="ghost-link" onClick={startFresh}>
+              ← Compile new agent
+            </button>
+          )}
+          <span className="mono">Hatch runtime · Prisma + Timbre</span>
+        </div>
       </header>
 
       <section className="hero">
         <p className="eyebrow">Voice-agent compiler</p>
-        <h1>Say it. Hatch it.<br /><em>Talk to it.</em></h1>
-        <p className="lede">Describe the voice agent you need. Hatch compiles a provenance-tracked spec, attacks it with simulated callers, repairs what breaks, and gives you a live voice agent.</p>
+        <h1>
+          Say it. Hatch it.<br />
+          <em>Talk to it.</em>
+        </h1>
+        <p className="lede">
+          Describe the voice agent you need. Hatch compiles a provenance-tracked spec, attacks it with simulated callers,
+          repairs what breaks, and gives you a live voice agent.
+        </p>
         <div className="notice">Demo uses synthetic data only — do not speak real personal details.</div>
       </section>
 
-      <nav className="steps" aria-label="Demo steps">
-        {["Speak or type", "Compile", "Test and repair", "Talk"].map((label, index) => (
+      <nav className="steps" aria-label="Single-page flow steps">
+        {["1 Speak or type", "2 Compile", "3 Test and repair", "4 Talk"].map((label, index) => (
           <span key={label} className={index === step ? "current" : index < step ? "complete" : ""}>
-            <b>{index + 1}</b>{label}
+            <b>{index + 1}</b>
+            {label.slice(2)}
           </span>
         ))}
       </nav>
 
+      {/* Step 1: Speak or type */}
       <section className="card capture" aria-labelledby="capture-title">
         <div className="section-head">
           <div>
@@ -617,7 +870,9 @@ function CreatePage() {
           </button>
           <div className="meter-wrap">
             <LevelMeter level={recorder.level} active={recorder.recording} />
-            <p className="muted">{recorder.recording ? "Listening — speak naturally, then tap stop." : "Or type a request below."}</p>
+            <p className="muted">
+              {recorder.recording ? "Listening — speak naturally, then tap stop." : "Or use the seeded demo request below."}
+            </p>
           </div>
         </div>
 
@@ -627,15 +882,22 @@ function CreatePage() {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Mere kapde ki dukaan ke liye ek customer support agent banao…"
-            rows={5}
+            rows={4}
           />
         </label>
         <div className="actions">
           <button type="button" onClick={() => void compileText()} disabled={working || description.trim().length < 8}>
             {working ? `Compiling · ${elapsed}s` : "Compile from text"} <span>↗</span>
           </button>
-          <button type="button" className="ghost" onClick={() => { setDescription(EXAMPLE_REQUEST); }} disabled={working}>
-            Use demo request
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => {
+              setDescription(EXAMPLE_REQUEST);
+            }}
+            disabled={working}
+          >
+            Use demo request (Hinglish clothing store)
           </button>
         </div>
 
@@ -651,6 +913,7 @@ function CreatePage() {
         {lastLatency !== null && <p className="metric">Voice round trip {lastLatency.toFixed(2)}s · Prisma + Timbre</p>}
       </section>
 
+      {/* Step 2: Compile */}
       {(working || agent) && (
         <section className="card compile" aria-labelledby="compile-title">
           <div className="section-head">
@@ -661,27 +924,65 @@ function CreatePage() {
             {agent && <span className="status-chip ok">spec v{agent.version}</span>}
           </div>
           <Stepper stages={agent?.compile_stages ?? []} working={working} />
-          {!agent && <p className="muted">Extracting requirements, negotiating Gnani capabilities, writing the spec, and linting voice copy.</p>}
+          {!agent && (
+            <p className="muted">
+              Extracting requirements, negotiating Gnani capabilities, writing the spec, and linting voice copy.
+            </p>
+          )}
         </section>
       )}
 
-      {agent && <SpecView agent={agent} onTest={() => void runTests()} testing={testing} report={report} />}
+      {/* Step 3: Test and repair */}
+      {agent && (
+        <SpecView
+          agent={agent}
+          onTest={() => void runTests()}
+          testing={testing}
+          report={report}
+          onScrollToTalk={scrollToTalk}
+        />
+      )}
 
+      {/* Step 4: Talk */}
+      {agent && (
+        <TalkPanel
+          agent={agent}
+          ledger={ledger}
+          onLedgerUpdate={(l) => setLedger(l)}
+          onError={(m) => setError(m)}
+        />
+      )}
+
+      {/* Collapsed Diagnostics */}
       <details className="diagnostics">
-        <summary>Diagnostics</summary>
+        <summary>Diagnostics & Speech Preview</summary>
         <p className="muted">Direct Timbre preview and local ledger. Uses real Gnani speech calls.</p>
         <label className="field">
           <span>Test Timbre with a typed phrase</span>
-          <textarea value={demoText} onChange={(event) => setDemoText(event.target.value)} rows={2} placeholder="Namaste, main Hatch hoon." />
+          <textarea
+            value={demoText}
+            onChange={(event) => setDemoText(event.target.value)}
+            rows={2}
+            placeholder="Namaste, main Hatch hoon."
+          />
         </label>
         <div className="actions">
-          <button type="button" className="ghost" onClick={() => void playDemo()} disabled={!demoText.trim()}>Play preview</button>
+          <button type="button" className="ghost" onClick={() => void playDemo()} disabled={!demoText.trim()}>
+            Play preview
+          </button>
         </div>
         <div className="ledger">
           <span>{ledger ? `${ledger.calls} Gnani calls` : "Gnani ledger"}</span>
-          <span>{ledger?.estimated_inr === null || ledger?.estimated_inr === undefined ? "cost estimate pending" : `₹${ledger.estimated_inr.toFixed(2)} estimated`}</span>
+          <span>
+            {ledger?.estimated_inr === null || ledger?.estimated_inr === undefined
+              ? "cost estimate pending"
+              : `₹${ledger.estimated_inr.toFixed(2)} estimated`}
+          </span>
         </div>
-        <small>Models: Gnani Prisma (speech in) and Timbre (speech out); third-party LLM for reasoning. Agents run on the Hatch runtime, not Gnani Agent Builder.</small>
+        <small>
+          Models: Gnani Prisma (speech in) and Timbre (speech out); third-party LLM on Groq for reasoning. Agents run on the Hatch
+          runtime, not Gnani Agent Builder.
+        </small>
       </details>
 
       <ErrorBanner message={error} />
@@ -693,203 +994,4 @@ function CreatePage() {
   );
 }
 
-function LivePage({ agentId }: { agentId: string }) {
-  const [agent, setAgent] = useState<AgentView | null>(null);
-  const [messages, setMessages] = useState<Turn[]>([]);
-  const [typed, setTyped] = useState("");
-  const [working, setWorking] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [handoff, setHandoff] = useState(false);
-  const [ledger, setLedger] = useState<Ledger | null>(null);
-  const [timing, setTiming] = useState<{ stt?: number; llm?: number; total?: number; cached?: boolean } | null>(null);
-  const messagesRef = useRef<Turn[]>([]);
-  messagesRef.current = messages;
-
-  const recorder = useRecorder(
-    (clip) => void sendVoice(clip),
-    (message) => setError(message),
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const spec = await request<AgentView>(`/api/agents/${encodeURIComponent(agentId)}`);
-        if (cancelled) return;
-        setAgent(spec);
-        setMessages([{ role: "assistant", content: spec.opening_line }]);
-        const summary = await request<Ledger>("/api/ledger").catch(() => null);
-        if (summary) setLedger(summary);
-      } catch (reason) {
-        if (!cancelled) setError(reason instanceof Error ? reason.message : "This agent could not be loaded.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    void load();
-    return () => { cancelled = true; };
-  }, [agentId]);
-
-  async function sendVoice(clip: Blob) {
-    setWorking(true);
-    setError("");
-    try {
-      const form = new FormData();
-      form.append("audio", clip, "turn.webm");
-      form.append("history", JSON.stringify(messagesRef.current));
-      const result = await request<VoiceTurn>(`/api/agents/${encodeURIComponent(agentId)}/voice-turn`, {
-        method: "POST",
-        body: form,
-      });
-      setMessages((current) => [
-        ...current,
-        { role: "user", content: result.transcript },
-        { role: "assistant", content: result.reply },
-      ]);
-      setHandoff(Boolean(result.handoff));
-      if (result.ledger) setLedger(result.ledger);
-      setTiming({
-        stt: result.stt_latency_seconds,
-        llm: result.llm_latency_seconds,
-        total: result.total_latency_seconds,
-        cached: result.tts_cached,
-      });
-      await playChunks(chunksOf(result));
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "The voice turn failed. Type your message instead.");
-    } finally {
-      setWorking(false);
-    }
-  }
-
-  async function sendText() {
-    const text = typed.trim();
-    if (!text) return;
-    setTyped("");
-    setWorking(true);
-    setError("");
-    try {
-      const result = await request<{ text: string; latency_seconds: number; handoff: boolean }>(
-        `/api/agents/${encodeURIComponent(agentId)}/turn`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, history: messagesRef.current }),
-        },
-      );
-      setMessages((current) => [
-        ...current,
-        { role: "user", content: text },
-        { role: "assistant", content: result.text },
-      ]);
-      setHandoff(Boolean(result.handoff));
-      setTiming({ llm: result.latency_seconds, total: result.latency_seconds });
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "That message failed. Try again.");
-    } finally {
-      setWorking(false);
-    }
-  }
-
-  if (loading) {
-    return <main className="app"><p className="muted">Loading your hatched agent…</p></main>;
-  }
-  if (!agent) {
-    return (
-      <main className="app">
-        <header className="topbar"><a className="brand" href="/">hatch<span>●</span></a><span className="mono">Hatch runtime</span></header>
-        <ErrorBanner message={error || "This agent was not found."} />
-        <a className="button-link" href="/">Compile a new agent <span>↗</span></a>
-      </main>
-    );
-  }
-
-  return (
-    <main className="app live-app">
-      <header className="topbar">
-        <a className="brand" href="/">hatch<span>●</span></a>
-        <span className="mono">Live on Hatch runtime · Prisma + Timbre</span>
-      </header>
-
-      <section className="live-head">
-        <div>
-          <p className="eyebrow">Your hatched agent</p>
-          <h1>{agent.name}</h1>
-          <p className="lede">{agent.persona}</p>
-        </div>
-        <a className="ghost-link" href="/">← Compile another</a>
-      </section>
-
-      <div className="notice">Synthetic data only. Runs on the Hatch runtime, powered by Gnani Prisma and Timbre.</div>
-      {handoff && (
-        <div className="banner handoff" role="status">
-          <strong>Human handoff requested</strong>
-          <span>A teammate would take over in a connected deployment. The transcript is preserved.</span>
-        </div>
-      )}
-
-      <section className="call-panel">
-        <div className="chat" aria-live="polite">
-          {messages.map((turn, index) => (
-            <article className={`bubble ${turn.role}`} key={`${index}-${turn.role}`}>
-              <span>{turn.role === "user" ? "You" : agent.name}</span>
-              <p>{turn.content}</p>
-            </article>
-          ))}
-          {working && <p className="thinking">Hatch is listening and thinking…</p>}
-        </div>
-
-        <div className="call-controls">
-          <button
-            type="button"
-            className={`mic ${recorder.recording ? "recording" : ""}`}
-            onClick={recorder.recording ? recorder.stop : () => void recorder.start()}
-            disabled={working}
-            aria-label={recorder.recording ? "Stop recording" : "Push to talk"}
-          >
-            <span className="mic-icon">{recorder.recording ? "■" : "●"}</span>
-            <strong>{recorder.recording ? clock(recorder.seconds) : "Push to talk"}</strong>
-            <small>{recorder.recording ? "Tap to send" : "Hindi · Hinglish · English"}</small>
-          </button>
-          <LevelMeter level={recorder.level} active={recorder.recording} />
-        </div>
-
-        <div className="text-turn">
-          <label>
-            <span className="sr-only">Type a message</span>
-            <input
-              value={typed}
-              onChange={(event) => setTyped(event.target.value)}
-              onKeyDown={(event) => { if (event.key === "Enter") void sendText(); }}
-              placeholder="Or type a message…"
-            />
-          </label>
-          <button type="button" className="secondary" disabled={working || !typed.trim()} onClick={() => void sendText()}>Send</button>
-        </div>
-
-        <div className="strip">
-          <span className="mono">Latency</span>
-          <span>STT {timing?.stt !== undefined ? `${(timing.stt * 1000).toFixed(0)} ms` : "—"}</span>
-          <span>LLM {timing?.llm !== undefined ? `${(timing.llm * 1000).toFixed(0)} ms` : "—"}</span>
-          <span>Turn {timing?.total !== undefined ? `${timing.total.toFixed(2)} s` : "—"}</span>
-          <span>{timing?.cached ? "TTS cached" : "TTS live"}</span>
-          <span>₹ {ledger?.estimated_inr !== null && ledger?.estimated_inr !== undefined ? ledger.estimated_inr.toFixed(2) : "—"} est.</span>
-        </div>
-      </section>
-
-      <ErrorBanner message={error} />
-      <footer className="footer">
-        <span>{agent.voice.voice} · {agent.voice.model} · {agent.stt.model}</span>
-        <span>Telephony and real payments are not supported.</span>
-      </footer>
-    </main>
-  );
-}
-
-function App() {
-  const agentId = window.location.pathname.match(/^\/a\/([^/]+)/)?.[1];
-  return agentId ? <LivePage agentId={agentId} /> : <CreatePage />;
-}
-
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(<HatchApp />);

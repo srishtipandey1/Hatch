@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import re
@@ -14,7 +14,7 @@ HINDI_DIGIT_WORDS = {
     "पांच": "5", "पाँच": "5", "छह": "6", "सात": "7", "आठ": "8", "नौ": "9",
 }
 PRIVATE_DATA_TERMS = re.compile(r"\b(aadhaar|pan card|otp|password|pin number)\b", re.IGNORECASE)
-HANDOFF_TERMS = re.compile(r"\b(human|teammate|manager|representative)\b", re.IGNORECASE)
+HANDOFF_TERMS = re.compile(r"\b(human|teammate|manager|representative|insan|executive|senior)\b", re.IGNORECASE)
 UNSUPPORTED_TERMS = re.compile(
     r"\b(phone calls?|telephony|outbound calls?|call (?:my )?customers|"
     r"(?:charge|take|process) (?:a )?(?:real )?payments?|real crm|clone (?:my|a) voice)\b",
@@ -133,21 +133,59 @@ async def respond(
         )
         if order:
             if language == "hi-IN":
-                status = "delay hua hai" if str(order["status"]).lower() == "delayed" else "pack ho gaya hai"
-                eta = "do din mein" if str(order["eta"]).lower() == "in two days" else "kal"
+                status_raw = str(order.get("status", "")).lower()
+                eta_raw = str(order.get("eta", "")).lower()
+                if "delay" in status_raw:
+                    status = "delay hua hai"
+                elif "out for delivery" in status_raw:
+                    status = "aaj delivery ke liye nikal chuka hai"
+                elif "ship" in status_raw:
+                    status = "dispatch ho gaya hai"
+                elif "deliver" in status_raw:
+                    status = "deliver ho chuka hai"
+                elif "pack" in status_raw:
+                    status = "pack ho gaya hai"
+                elif "process" in status_raw:
+                    status = "process ho raha hai"
+                else:
+                    status = f"{order.get('status')} hai"
+
+                if "two days" in eta_raw or "2 days" in eta_raw:
+                    eta = "do din mein"
+                elif "three days" in eta_raw or "3 days" in eta_raw:
+                    eta = "teen din mein"
+                elif "tomorrow" in eta_raw:
+                    eta = "kal"
+                elif "today" in eta_raw:
+                    eta = "aaj"
+                elif "yesterday" in eta_raw:
+                    eta = "kal"
+                else:
+                    eta = str(order.get("eta"))
                 response = f"Aapka demo order {order['order_id']} {status}. Delivery ka estimate {eta} hai."
             else:
                 response = (
-                    f"Your demo order {order['order_id']} is {str(order['status']).lower()}. "
-                    f"The current delivery estimate is {order['eta']}."
+                    f"Your demo order {order['order_id']} is {str(order.get('status', '')).lower()}. "
+                    f"The current delivery estimate is {order.get('eta')}."
                 )
         else:
-            response = f"I could not find demo order {order_id}. Please check the order ID."
+            if language == "hi-IN":
+                response = f"Mujhe demo order {order_id} nahi mila. Kripya apna order ID check karein (ORD-1001 se ORD-1010)."
+            else:
+                response = f"I could not find demo order {order_id}. Please check the order ID (ORD-1001 to ORD-1010)."
         return response, False, round(time.perf_counter() - started, 3)
 
     handoff = bool(HANDOFF_TERMS.search(text)) and any(
-        word in text.lower() for word in ("talk", "connect", "speak", "transfer", "human")
+        word in text.lower() for word in (
+            "talk", "connect", "speak", "transfer", "human", "person", "representative",
+            "baat", "karao", "karni", "dena", "gussa", "angry", "manager", "teammate",
+        )
     )
+    if not handoff and any(phrase in text.lower() for phrase in (
+        "human se baat", "manager se baat", "insan se baat", "kisi se baat", "human ko", "connect to human",
+        "talk to human", "speak to a human", "speak with a human", "transfer me", "connect me to a manager"
+    )):
+        handoff = True
     if handoff:
         if language == "hi-IN":
             return (

@@ -36,3 +36,19 @@
 - Cost: replaced fail-closed speech with conservative planning estimates (STT 0.05 INR/s, TTS 0.50 INR/1000 chars) and kept the 70% budget guard. The UI shows ledger calls and estimated INR; `docs/CREDITS.md` marks the rates as estimates.
 - Verification: `python scripts/test.py` → 31 passed; `python scripts/smoke.py` → TTS 200, STT 200, `prisma-v3.0`; backend `/api/health` ok; frontend dev server HTTP 200.
 - Not verified: physical microphone hardware, browser audio playback by a human, and a Playwright walkthrough (no browser automation tool in this environment). The demo rehearsal must still be run by the presenter.
+
+## 2026-11-15 14:05–17:40 IST
+
+- Complete session: took over from prior engineer after quota exhaustion.
+- Verified all previously-claimed DONE items by running commands and observing output.
+- CORS on OPTIONS /api/agents already fixed (commit 8800a4b); confirmed with Invoke-WebRequest.
+- Text pipeline: POST /api/agents → 201, 7/7 sim pass, text turn returns Hindi order status, angry caller triggers handoff.
+- Single-page flow complete: speak or type → compile (live stage timings) → provenance-badged spec → 7-caller report → Talk panel inline. `npm run build --prefix frontend` passes.
+- Seeded demo button fills textarea with Hinglish clothing-store description including ORD-1001–ORD-1010.
+- 10 synthetic orders (ORD-1001–ORD-1010) with richer Hindi status/ETA strings added to runtime.
+- Handoff triggers extended: matches gussa, manager se baat, human se baat, karao, insan, executive, senior.
+- `python scripts/test.py` → 33 passed in 9.45s (up from 31).
+- `python scripts/smoke.py` → TTS 200, prisma-v3.0, transcript_length 40, 0.799s round-trip.
+- Playwright E2E browser test: navigated to /a/<id>, spec loaded, 7-row report, order lookup turn, handoff turn, banner appeared, telemetry strip visible. Screenshot saved to review/phase_final/browser_talk_verified.png.
+- review/phase_final/STATUS.md written with DONE/PARTIAL/NOT DONE and telemetry table.
+- Remaining NOT DONE: physical mic rehearsal, demo video, submission post (all user tasks).

@@ -391,7 +391,15 @@ async def compile_agent(description: str, llm: LLMGateway) -> AgentSpec:
         synthetic_store={
             "orders": [
                 {"order_id": "ORD-1001", "status": "Packed", "eta": "tomorrow"},
+                {"order_id": "ORD-1002", "status": "Shipped", "eta": "in two days"},
+                {"order_id": "ORD-1003", "status": "Delivered", "eta": "yesterday"},
                 {"order_id": "ORD-1004", "status": "Delayed", "eta": "in two days"},
+                {"order_id": "ORD-1005", "status": "Out for delivery", "eta": "today"},
+                {"order_id": "ORD-1006", "status": "Processing", "eta": "in three days"},
+                {"order_id": "ORD-1007", "status": "Packed", "eta": "tomorrow"},
+                {"order_id": "ORD-1008", "status": "Shipped", "eta": "in two days"},
+                {"order_id": "ORD-1009", "status": "Delayed", "eta": "in three days"},
+                {"order_id": "ORD-1010", "status": "Delivered", "eta": "two days ago"},
             ]
         },
         escalation=requirements.escalation or ["Offer a human teammate for unresolved or sensitive cases."],

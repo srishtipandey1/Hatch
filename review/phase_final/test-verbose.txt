@@ -1,43 +1,44 @@
-============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-8.3.5, pluggy-1.6.0 -- C:\Users\Srishti Pandey\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
-cachedir: .pytest_cache
-rootdir: C:\Users\Srishti Pandey\hatch
-configfile: pytest.ini
-testpaths: tests
-plugins: anyio-4.13.0, asyncio-0.23.7, cov-7.1.0
-asyncio: mode=Mode.STRICT
-collecting ... collected 31 items
-
-tests/test_audio.py::test_webm_recording_converts_to_mono_16khz_wav PASSED [  3%]
-tests/test_audio.py::test_missing_ffmpeg_returns_text_fallback_error PASSED [  6%]
-tests/test_compiler.py::test_hinglish_description_enables_code_mix PASSED [  9%]
-tests/test_compiler.py::test_capability_negotiation_reports_unsupported_language PASSED [ 12%]
-tests/test_compiler.py::test_capability_negotiation_accepts_bcp47_codes PASSED [ 16%]
-tests/test_compiler.py::test_unsupported_live_integrations_are_surfaced PASSED [ 19%]
-tests/test_compiler.py::test_negated_unsupported_requests_are_not_reported PASSED [ 22%]
-tests/test_compiler.py::test_agent_name_removes_duplicate_support_suffix PASSED [ 25%]
-tests/test_compiler.py::test_compiler_keeps_hinglish_and_provenance_without_provider PASSED [ 29%]
-tests/test_compiler.py::test_legacy_symbolic_voice_speed_migrates_to_numeric_rate PASSED [ 32%]
-tests/test_gnani.py::test_priority_limiter_runs_waiters_by_priority PASSED [ 35%]
-tests/test_gnani.py::test_tts_cache_prevents_duplicate_provider_calls PASSED [ 38%]
-tests/test_gnani.py::test_stt_retries_rate_limit_then_succeeds PASSED    [ 41%]
-tests/test_gnani.py::test_unpriced_speech_calls_fail_closed PASSED       [ 45%]
-tests/test_gnani.py::test_budget_guard_blocks_before_the_provider_call PASSED [ 48%]
-tests/test_gnani.py::test_shipped_defaults_price_speech_so_the_voice_path_stays_enabled PASSED [ 51%]
-tests/test_health.py::test_health_endpoint_reports_service PASSED        [ 54%]
-tests/test_lint.py::test_internal_prompt_is_not_checked_as_spoken_sentence PASSED [ 58%]
-tests/test_llm_simulator.py::test_invalid_json_gets_one_structured_repair_request PASSED [ 61%]
-tests/test_llm_simulator.py::test_llm_rate_limit_error_is_explicit_and_safe PASSED [ 64%]
-tests/test_llm_simulator.py::test_llm_retries_a_transient_rate_limit PASSED [ 67%]
-tests/test_llm_simulator.py::test_llm_validation_error_exposes_safe_provider_diagnostic PASSED [ 70%]
-tests/test_llm_simulator.py::test_structured_requests_always_satisfy_json_mode_requirement PASSED [ 74%]
-tests/test_llm_simulator.py::test_simulator_evidence_turn_is_taken_from_agent_reply PASSED [ 77%]
-tests/test_llm_simulator.py::test_simulator_reports_before_and_after_one_repair_round PASSED [ 80%]
-tests/test_runtime.py::test_synthetic_order_lookup_uses_declared_record PASSED [ 83%]
-tests/test_runtime.py::test_private_data_probe_is_refused_without_llm PASSED [ 87%]
-tests/test_runtime.py::test_hindi_order_answer_uses_primary_language PASSED [ 90%]
-tests/test_runtime.py::test_order_id_survives_hindi_number_words_and_devanagari_digits PASSED [ 93%]
-tests/test_runtime.py::test_english_handoff_uses_english_even_when_primary_is_hindi PASSED [ 96%]
-tests/test_store.py::test_legacy_spec_gets_explicit_missing_provenance PASSED [100%]
-
-============================= 31 passed in 8.75s ==============================
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.5, pluggy-1.6.0 -- C:\Users\Srishti Pandey\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Srishti Pandey\hatch
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-0.23.7, cov-7.1.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 33 items
+
+tests/test_audio.py::test_webm_recording_converts_to_mono_16khz_wav PASSED [  3%]
+tests/test_audio.py::test_missing_ffmpeg_returns_text_fallback_error PASSED [  6%]
+tests/test_compiler.py::test_hinglish_description_enables_code_mix PASSED [  9%]
+tests/test_compiler.py::test_capability_negotiation_reports_unsupported_language PASSED [ 12%]
+tests/test_compiler.py::test_capability_negotiation_accepts_bcp47_codes PASSED [ 15%]
+tests/test_compiler.py::test_unsupported_live_integrations_are_surfaced PASSED [ 18%]
+tests/test_compiler.py::test_negated_unsupported_requests_are_not_reported PASSED [ 21%]
+tests/test_compiler.py::test_agent_name_removes_duplicate_support_suffix PASSED [ 24%]
+tests/test_compiler.py::test_compiler_keeps_hinglish_and_provenance_without_provider PASSED [ 27%]
+tests/test_compiler.py::test_legacy_symbolic_voice_speed_migrates_to_numeric_rate PASSED [ 30%]
+tests/test_gnani.py::test_priority_limiter_runs_waiters_by_priority PASSED [ 33%]
+tests/test_gnani.py::test_tts_cache_prevents_duplicate_provider_calls PASSED [ 36%]
+tests/test_gnani.py::test_stt_retries_rate_limit_then_succeeds PASSED    [ 39%]
+tests/test_gnani.py::test_unpriced_speech_calls_fail_closed PASSED       [ 42%]
+tests/test_gnani.py::test_budget_guard_blocks_before_the_provider_call PASSED [ 45%]
+tests/test_gnani.py::test_shipped_defaults_price_speech_so_the_voice_path_stays_enabled PASSED [ 48%]
+tests/test_health.py::test_health_endpoint_reports_service PASSED        [ 51%]
+tests/test_lint.py::test_internal_prompt_is_not_checked_as_spoken_sentence PASSED [ 54%]
+tests/test_llm_simulator.py::test_invalid_json_gets_one_structured_repair_request PASSED [ 57%]
+tests/test_llm_simulator.py::test_llm_rate_limit_error_is_explicit_and_safe PASSED [ 60%]
+tests/test_llm_simulator.py::test_llm_retries_a_transient_rate_limit PASSED [ 63%]
+tests/test_llm_simulator.py::test_llm_validation_error_exposes_safe_provider_diagnostic PASSED [ 66%]
+tests/test_llm_simulator.py::test_structured_requests_always_satisfy_json_mode_requirement PASSED [ 69%]
+tests/test_llm_simulator.py::test_simulator_evidence_turn_is_taken_from_agent_reply PASSED [ 72%]
+tests/test_llm_simulator.py::test_simulator_reports_before_and_after_one_repair_round PASSED [ 75%]
+tests/test_runtime.py::test_synthetic_order_lookup_uses_declared_record PASSED [ 78%]
+tests/test_runtime.py::test_private_data_probe_is_refused_without_llm PASSED [ 81%]
+tests/test_runtime.py::test_hindi_order_answer_uses_primary_language PASSED [ 84%]
+tests/test_runtime.py::test_order_id_survives_hindi_number_words_and_devanagari_digits PASSED [ 87%]
+tests/test_runtime.py::test_english_handoff_uses_english_even_when_primary_is_hindi PASSED [ 90%]
+tests/test_runtime.py::test_hindi_handoff_triggers_on_angry_or_human_request PASSED [ 93%]
+tests/test_runtime.py::test_synthetic_orders_range_supported PASSED      [ 96%]
+tests/test_store.py::test_legacy_spec_gets_explicit_missing_provenance PASSED [100%]
+
+============================= 33 passed in 9.06s ==============================

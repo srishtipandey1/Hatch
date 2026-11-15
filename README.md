@@ -38,7 +38,7 @@ Automated tests use fakes and do not spend Gnani credits. The smoke check uses t
 
 ## Models and limitations
 
-Speech uses the Gnani Prisma STT and Timbre TTS APIs. Reasoning uses the third-party OpenAI-compatible LLM configured by `LLM_BASE_URL` / `LLM_MODEL`; Evon is not available as a hosted API. Agents run on the Hatch runtime, not Gnani Agent Builder. Calls and action data are synthetic; no telephony or real customer integrations are provided. LLM-generated evaluation results are small-sample estimates, not guarantees. Speech costs are conservative planning estimates because per-unit dashboard rates were not supplied; see [docs/CREDITS.md](./docs/CREDITS.md). Text compilation and simulation work even if speech is blocked by the local budget guard.
+Speech uses the Gnani Prisma STT and Timbre TTS APIs. Reasoning uses the third-party OpenAI-compatible LLM on Groq (configured by `LLM_BASE_URL` / `LLM_MODEL`); Evon is not available as a hosted API. Agents run on the Hatch runtime, not Gnani Agent Builder. Calls and action data are synthetic (demo orders ORD-1001 to ORD-1010); no telephony or real customer integrations are provided. LLM-generated evaluation results are small-sample estimates, not guarantees. Speech costs are conservative planning estimates because per-unit dashboard rates were not supplied; see [docs/CREDITS.md](./docs/CREDITS.md). Text compilation and simulation work even if speech is blocked by the local budget guard.
 
 ## Privacy
 

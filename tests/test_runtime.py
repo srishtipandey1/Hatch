@@ -83,3 +83,44 @@ def test_english_handoff_uses_english_even_when_primary_is_hindi() -> None:
 
     assert handoff
     assert "human teammate" in reply
+
+
+def test_hindi_handoff_triggers_on_angry_or_human_request() -> None:
+    spec = build_spec()
+    spec.language_policy.primary = "hi-IN"
+    spec.language_policy.allowed = ["hi-IN", "en-IN"]
+
+    reply, handoff, _latency = asyncio.run(
+        respond(spec, "Mujhe kisi manager ya human se baat karni hai, main bohot gussa hoon!", [], UnusedLLM())
+    )
+
+    assert handoff
+    assert "human teammate" in reply
+
+
+def test_synthetic_orders_range_supported() -> None:
+    from backend.app.compiler import compile_agent
+    class DummyLLM:
+        async def structured(self, **kwargs):
+            from backend.app.models import RequirementSet, GeneratedCopy
+            if kwargs["schema"] == RequirementSet:
+                return RequirementSet(
+                    business_context="Clothing store",
+                    agent_goal="Help with orders and returns",
+                    languages=["hi-IN", "en-IN"],
+                    tone="Warm and polite",
+                    code_mix_expected=False,
+                    responsibilities=["orders", "returns"],
+                )
+            return GeneratedCopy(
+                name="Store Support",
+                persona="Helpful assistant",
+                opening_line="Namaste!",
+                closing_line="Alvida!",
+                system_prompt="Be polite.",
+            )
+    spec = asyncio.run(compile_agent("Clothing store", DummyLLM()))
+    assert len(spec.synthetic_store["orders"]) == 10
+    assert spec.synthetic_store["orders"][0]["order_id"] == "ORD-1001"
+    assert spec.synthetic_store["orders"][-1]["order_id"] == "ORD-1010"
+
