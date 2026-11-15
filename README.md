@@ -1,49 +1,178 @@
 # Hatch
 
-**Say it. Hatch it. Talk to it.**
+**Build voice agents in seconds.**
 
-Hatch turns a spoken or typed description into a provenance-tracked voice-agent specification, tests it with simulated callers, and serves the agent on the Hatch runtime using Gnani Prisma (speech in) and Timbre (speech out).
+Hatch turns a spoken or typed description into a working voice agent. Describe what you need in Hindi, Hinglish, or English — Hatch compiles a spec, tests it with simulated callers, repairs what breaks, and gives you a live agent you can talk to immediately.
 
-## Requirements
+Built for the [Gnani Great Indian AI Internship Challenge](https://gnani.ai/internship) · Uses Gnani Prisma (STT) + Timbre (TTS)
+
+![Hatch UI](./docs/assets/hatch-screenshot.png)
+
+## ✨ Features
+
+- **Voice-first input** — Describe your agent by speaking or typing
+- **Automatic spec generation** — Extracts requirements, responsibilities, escalation policies, and conversation flows
+- **Simulated testing** — Runs your agent against 7 realistic caller scenarios before you talk to it
+- **Self-repair loop** — Automatically fixes issues found during testing
+- **Multilingual** — Hindi, Hinglish, English, and 8+ Indic languages via Gnani Prisma
+- **Live conversation** — Talk to your agent with real-time voice or text
+- **Cost tracking** — Real-time ledger showing Gnani API usage and estimated costs
+
+## 🚀 Quick Start
+
+### Requirements
 
 - Python 3.11+
-- Node.js LTS
-- `.env` populated with the variables in `.env.example`
+- Node.js LTS (v20+)
+- Gnani API key (get yours at [app.gnani.ai](https://app.gnani.ai))
+- Groq API key (for LLM reasoning)
 
-The backend uses the bundled ffmpeg binary from `imageio-ffmpeg`; a separate system installation is not required.
-
-## Run
+### Setup
 
 ```powershell
+# Clone and install
+git clone <your-repo-url>
+cd hatch
 python -m pip install -r requirements.txt
-Push-Location frontend
+
+# Install frontend
+cd frontend
 npm install
-Pop-Location
-if (!(Test-Path .env)) { Copy-Item .env.example .env }
-# Fill in .env locally; never commit it.
+cd ..
+
+# Configure environment
+Copy-Item .env.example .env
+# Edit .env with your API keys:
+# - GNANI_API_KEY
+# - GNANI_BASE_URL (default: https://api.vachana.ai)
+# - LLM_BASE_URL (default: https://api.groq.com/openai/v1)
+# - LLM_MODEL (default: llama-3.1-70b-versatile)
+# - LLM_API_KEY
+
+# Run both backend and frontend
 python scripts/dev.py
 ```
 
-Open the URL that Vite prints (normally <http://localhost:5173>). Backend API docs are at <http://localhost:8000/docs>.
+Open **http://localhost:5173** to start building agents.
 
-## Tests and smoke check
+API documentation is available at **http://localhost:8000/docs**.
+
+## 🎯 How It Works
+
+### The Four Steps
+
+1. **Speak or Type** — Describe your agent in natural language  
+   _Example: "Mere kapde ki dukaan ke liye ek customer support agent banao. Orders aur return policy handle karo."_
+
+2. **Compile** — Hatch extracts requirements, writes the spec, and lints for voice-readiness
+
+3. **Test** — Seven simulated callers stress-test your agent; failures trigger automatic repairs
+
+4. **Talk** — Have a real conversation with your agent via voice or text
+
+### Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   You       │────▶│   Hatch      │────▶│   Gnani     │
+│  (voice/    │     │   Compiler   │     │   Prisma    │
+│   text)     │     │   + Runtime  │     │   + Timbre  │
+└─────────────┘     └──────────────┘     └─────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   Groq LLM   │
+                    │  (reasoning) │
+                    └──────────────┘
+```
+
+Hatch runs its own agent runtime — it does **not** use Gnani Agent Builder. This gives full control over agent behavior, testing, and iteration.
+
+## 🧪 Testing
+
+### Unit Tests (no API credits)
 
 ```powershell
 python scripts/test.py
-# Start the app first; speech requires GNANI_API_KEY.
+```
+
+Tests use fakes and do not spend Gnani credits.
+
+### Smoke Check (spends minimal credits)
+
+```powershell
+# Start the app first
+python scripts/dev.py
+
+# In another terminal
 python scripts/smoke.py
 ```
 
-Automated tests use fakes and do not spend Gnani credits. The smoke check uses the local gateway for one synthetic TTS-to-STT round trip and therefore spends a small, ledgered amount.
+The smoke check performs one synthetic TTS→STT round trip (~₹0.01).
 
-## Models and limitations
+## 📊 Models & APIs Used
 
-Speech uses the Gnani Prisma STT and Timbre TTS APIs. Reasoning uses the third-party OpenAI-compatible LLM on Groq (configured by `LLM_BASE_URL` / `LLM_MODEL`); Evon is not available as a hosted API. Agents run on the Hatch runtime, not Gnani Agent Builder. Calls and action data are synthetic (demo orders ORD-1001 to ORD-1010); no telephony or real customer integrations are provided. LLM-generated evaluation results are small-sample estimates, not guarantees. Speech costs are conservative planning estimates because per-unit dashboard rates were not supplied; see [docs/CREDITS.md](./docs/CREDITS.md). Text compilation and simulation work even if speech is blocked by the local budget guard.
+| Component | Model/API | Provider |
+|-----------|-----------|----------|
+| Speech-to-Text | Prisma v2.5/v3.0 | Gnani |
+| Text-to-Speech | Timbre v2.5/v3.0 | Gnani |
+| Reasoning | Llama 3.1 70B | Groq |
+| Voice Cloning | Not used (out of scope) | — |
 
-## Privacy
+**Note:** Hatch uses synthetic data only. Do not speak or enter real personal, financial, or account details.
 
-The demo uses synthetic data only. Do not speak or enter real personal, financial, or account details. API keys stay on the backend and must never be committed.
+## 🌍 Supported Languages
 
-## How this was built
+Hindi, English, Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil, Telugu
 
-TODO: Repository owner to fill in.
+## 📁 Project Structure
+
+```
+hatch/
+├── backend/           # Python FastAPI server
+│   ├── agents/        # Agent compilation & runtime
+│   ├── voice/         # Gnani STT/TTS integration
+│   ├── llm/           # LLM reasoning layer
+│   └── test/          # Simulated caller scenarios
+├── frontend/          # React + Vite + TypeScript
+│   └── src/
+│       ├── main.tsx   # Main app component
+│       └── style.css  # Styles
+├── scripts/
+│   ├── dev.py         # Run both backend + frontend
+│   ├── test.py        # Run test suite
+│   └── smoke.py       # Smoke check script
+├── docs/              # Technical documentation
+└── README.md
+```
+
+## 🔒 Privacy & Safety
+
+- **Synthetic data only** — This is a demo. Never use real customer data, phone numbers, account details, or recorded calls.
+- **API keys stay on backend** — Keys are loaded from `.env` and never committed to version control.
+- **No persistent recordings** — Voice clips are processed in real-time and discarded.
+
+## 🚧 Limitations
+
+- **Demo scope** — Supports synthetic order lookup (ORD-1001 to ORD-1010) and return policy queries only
+- **No telephony** — Voice interaction is browser-based; no phone integration
+- **No real actions** — Agent cannot place orders, process refunds, or access external systems
+- **Estimates only** — Test results and cost projections are small-sample estimates, not guarantees
+
+## 📝 License
+
+MIT License — see [LICENSE](./LICENSE) for details.
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Gnani.ai](https://gnani.ai) — Prisma STT and Timbre TTS APIs
+- [Groq](https://groq.com) — Fast LLM inference
+- [React](https://react.dev) — Frontend framework
+- [FastAPI](https://fastapi.tiangolo.com) — Backend framework
+
+---
+
+**Made with ❤️ for the Great Indian AI Internship Challenge**
+
+*Deadline: 15 Nov 2026, 18:00 IST*
