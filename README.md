@@ -152,9 +152,3 @@ hatch/
 ## License
 
 MIT License — see LICENSE for details.
-
----
-
-Built for the Gnani Great Indian AI Internship Challenge
-
-Deadline: 15 Nov 2026, 18:00 IST
