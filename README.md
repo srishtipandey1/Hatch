@@ -1,14 +1,12 @@
 # Hatch
 
-**Build voice agents in seconds.**
+Build voice agents in seconds.
 
 Hatch turns a spoken or typed description into a working voice agent. Describe what you need in Hindi, Hinglish, or English — Hatch compiles a spec, tests it with simulated callers, repairs what breaks, and gives you a live agent you can talk to immediately.
 
-Built for the [Gnani Great Indian AI Internship Challenge](https://gnani.ai/internship) · Uses Gnani Prisma (STT) + Timbre (TTS)
+Built for the Gnani Great Indian AI Internship Challenge. Uses Gnani Prisma (STT) and Timbre (TTS).
 
-![Hatch UI](./docs/assets/hatch-screenshot.png)
-
-## ✨ Features
+## Features
 
 - **Voice-first input** — Describe your agent by speaking or typing
 - **Automatic spec generation** — Extracts requirements, responsibilities, escalation policies, and conversation flows
@@ -18,13 +16,13 @@ Built for the [Gnani Great Indian AI Internship Challenge](https://gnani.ai/inte
 - **Live conversation** — Talk to your agent with real-time voice or text
 - **Cost tracking** — Real-time ledger showing Gnani API usage and estimated costs
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Requirements
 
 - Python 3.11+
 - Node.js LTS (v20+)
-- Gnani API key (get yours at [app.gnani.ai](https://app.gnani.ai))
+- Gnani API key (get yours at app.gnani.ai)
 - Groq API key (for LLM reasoning)
 
 ### Setup
@@ -53,16 +51,16 @@ Copy-Item .env.example .env
 python scripts/dev.py
 ```
 
-Open **http://localhost:5173** to start building agents.
+Open http://localhost:5173 to start building agents.
 
-API documentation is available at **http://localhost:8000/docs**.
+API documentation is available at http://localhost:8000/docs.
 
-## 🎯 How It Works
+## How It Works
 
 ### The Four Steps
 
-1. **Speak or Type** — Describe your agent in natural language  
-   _Example: "Mere kapde ki dukaan ke liye ek customer support agent banao. Orders aur return policy handle karo."_
+1. **Speak or Type** — Describe your agent in natural language
+   Example: "Mere kapde ki dukaan ke liye ek customer support agent banao. Orders aur return policy handle karo."
 
 2. **Compile** — Hatch extracts requirements, writes the spec, and lints for voice-readiness
 
@@ -72,23 +70,15 @@ API documentation is available at **http://localhost:8000/docs**.
 
 ### Architecture
 
+Hatch runs its own agent runtime — it does not use Gnani Agent Builder. This gives full control over agent behavior, testing, and iteration.
+
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   You       │────▶│   Hatch      │────▶│   Gnani     │
-│  (voice/    │     │   Compiler   │     │   Prisma    │
-│   text)     │     │   + Runtime  │     │   + Timbre  │
-└─────────────┘     └──────────────┘     └─────────────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │   Groq LLM   │
-                    │  (reasoning) │
-                    └──────────────┘
+User (voice/text) → Hatch Compiler + Runtime → Gnani Prisma + Timbre
+                                      ↓
+                                 Groq LLM (reasoning)
 ```
 
-Hatch runs its own agent runtime — it does **not** use Gnani Agent Builder. This gives full control over agent behavior, testing, and iteration.
-
-## 🧪 Testing
+## Testing
 
 ### Unit Tests (no API credits)
 
@@ -108,9 +98,9 @@ python scripts/dev.py
 python scripts/smoke.py
 ```
 
-The smoke check performs one synthetic TTS→STT round trip (~₹0.01).
+The smoke check performs one synthetic TTS to STT round trip (approximately ₹0.01).
 
-## 📊 Models & APIs Used
+## Models and APIs
 
 | Component | Model/API | Provider |
 |-----------|-----------|----------|
@@ -121,16 +111,16 @@ The smoke check performs one synthetic TTS→STT round trip (~₹0.01).
 
 **Note:** Hatch uses synthetic data only. Do not speak or enter real personal, financial, or account details.
 
-## 🌍 Supported Languages
+## Supported Languages
 
 Hindi, English, Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil, Telugu
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 hatch/
 ├── backend/           # Python FastAPI server
-│   ├── agents/        # Agent compilation & runtime
+│   ├── agents/        # Agent compilation and runtime
 │   ├── voice/         # Gnani STT/TTS integration
 │   ├── llm/           # LLM reasoning layer
 │   └── test/          # Simulated caller scenarios
@@ -139,40 +129,32 @@ hatch/
 │       ├── main.tsx   # Main app component
 │       └── style.css  # Styles
 ├── scripts/
-│   ├── dev.py         # Run both backend + frontend
+│   ├── dev.py         # Run both backend and frontend
 │   ├── test.py        # Run test suite
 │   └── smoke.py       # Smoke check script
 ├── docs/              # Technical documentation
 └── README.md
 ```
 
-## 🔒 Privacy & Safety
+## Privacy and Safety
 
 - **Synthetic data only** — This is a demo. Never use real customer data, phone numbers, account details, or recorded calls.
 - **API keys stay on backend** — Keys are loaded from `.env` and never committed to version control.
 - **No persistent recordings** — Voice clips are processed in real-time and discarded.
 
-## 🚧 Limitations
+## Limitations
 
 - **Demo scope** — Supports synthetic order lookup (ORD-1001 to ORD-1010) and return policy queries only
 - **No telephony** — Voice interaction is browser-based; no phone integration
 - **No real actions** — Agent cannot place orders, process refunds, or access external systems
 - **Estimates only** — Test results and cost projections are small-sample estimates, not guarantees
 
-## 📝 License
+## License
 
-MIT License — see [LICENSE](./LICENSE) for details.
-
-## 🙏 Acknowledgments
-
-Built with:
-- [Gnani.ai](https://gnani.ai) — Prisma STT and Timbre TTS APIs
-- [Groq](https://groq.com) — Fast LLM inference
-- [React](https://react.dev) — Frontend framework
-- [FastAPI](https://fastapi.tiangolo.com) — Backend framework
+MIT License — see LICENSE for details.
 
 ---
 
-**Made with ❤️ for the Great Indian AI Internship Challenge**
+Built for the Gnani Great Indian AI Internship Challenge
 
-*Deadline: 15 Nov 2026, 18:00 IST*
+Deadline: 15 Nov 2026, 18:00 IST
