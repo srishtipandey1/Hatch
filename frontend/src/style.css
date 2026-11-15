@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,600&display=swap");
+
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #242b26;
+  background: #f5f4ed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+.shell { max-width: 1320px; margin: auto; padding: 28px 7vw; }
+.topbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dcded4; padding-bottom: 20px; }
+.brand { color: #263d33; text-decoration: none; font-size: 24px; font-weight: 700; letter-spacing: -1.5px; }
+.brand span { color: #df794f; font-size: 10px; margin-left: 4px; vertical-align: top; }
+.runtime, .eyebrow, small { font: 10px "DM Mono", monospace; letter-spacing: 1.2px; color: #79827b; }
+.hero { width: min(680px, 100%); margin: clamp(70px, 12vh, 145px) auto 0; }
+.eyebrow { color: #c46843; }
+h1 { font-size: clamp(48px, 7vw, 82px); line-height: .98; letter-spacing: -5px; font-weight: 600; margin: 20px 0; }
+h1 em { font-family: "Playfair Display", serif; color: #47745b; font-weight: 600; }
+.intro { font-size: 17px; color: #69736b; margin: 28px 0; }
+.notice { border-left: 2px solid #d77b52; background: #ece9dc; padding: 13px 15px; font-size: 13px; margin-bottom: 16px; }
+textarea { display: block; width: 100%; min-height: 140px; border: 1px solid #d4d8cf; background: #fbfaf6; border-radius: 6px; padding: 18px; font: inherit; resize: vertical; outline-color: #537861; }
+button { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 12px; border: 0; border-radius: 5px; padding: 15px 18px; color: #fff; background: #47745b; font: 600 14px "DM Sans", sans-serif; }
+button:disabled { opacity: .6; }
+small { display: block; margin-top: 20px; letter-spacing: .3px; }

@@ -6,6 +6,7 @@ __pycache__/
 .venv/
 node_modules/
 dist/
+*.tsbuildinfo
 *.sqlite
 *.db
 audio_cache/

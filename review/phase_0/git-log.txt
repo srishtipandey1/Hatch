@@ -1,0 +1,2 @@
+ff6f635 Add project instructions
+e3c44ba docs: Hatch handoff and project plan

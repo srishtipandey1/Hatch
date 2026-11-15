@@ -1,0 +1,29 @@
+ .env.example                    |    6 +
+ PROGRESS.md                     |   18 +
+ README.md                       |   48 ++
+ backend/__init__.py             |    0
+ backend/app/__init__.py         |    0
+ backend/app/main.py             |   15 +
+ docs/CREDITS.md                 |   10 +
+ docs/DECISIONS.md               |    8 +
+ docs/VERIFIED_GNANI.md          |   87 ++
+ frontend/index.html             |   12 +
+ frontend/package-lock.json      | 1745 +++++++++++++++++++++++++++++++++++++++
+ frontend/package.json           |   21 +
+ frontend/src/main.tsx           |   27 +
+ frontend/src/style.css          |   27 +
+ frontend/tsconfig.json          |   17 +
+ frontend/vite.config.ts         |    4 +
+ requirements.txt                |    7 +
+ review/phase_0/STATUS.md        |   13 +
+ review/phase_0/build-output.txt |  Bin 0 -> 1152 bytes
+ review/phase_0/git-log.txt      |    2 +
+ review/phase_0/smoke-output.txt |  Bin 0 -> 1642 bytes
+ review/phase_0/test-output.txt  |  Bin 0 -> 202 bytes
+ scripts/__init__.py             |    0
+ scripts/dev.py                  |   65 ++
+ scripts/probe_gnani.py          |  219 +++++
+ scripts/smoke.py                |   12 +
+ scripts/test.py                 |   12 +
+ tests/test_health.py            |   10 +
+ 28 files changed, 2385 insertions(+)
